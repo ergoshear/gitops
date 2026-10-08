@@ -18,7 +18,7 @@ prometheus:
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: "standard"
+          storageClassName: "local-path"
           resources:
             requests:
               storage: 50Gi
@@ -31,7 +31,7 @@ grafana:
   adminPassword: "admin"
   persistence:
     enabled: true
-    storageClassName: "standard"
+    storageClassName: "local-path"
     size: 10Gi
   resources:
     limits:
