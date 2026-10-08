@@ -4,3 +4,6 @@ kind: Kustomization
 resources:
 - install.yaml
 - repository-secret.yaml
+
+patches:
+- path: argocd-cm-patch.yaml
