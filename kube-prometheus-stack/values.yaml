@@ -1,0 +1,99 @@
+# Global settings
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# Prometheus configuration
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 10d
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+      requests:
+        cpu: 1000m
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "standard"
+          resources:
+            requests:
+              storage: 50Gi
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+# Grafana configuration
+grafana:
+  enabled: true
+  adminPassword: "admin"
+  persistence:
+    enabled: true
+    storageClassName: "standard"
+    size: 10Gi
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  ingress:
+    enabled: false
+
+# Alertmanager configuration
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
+    retention: 120h
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+# Node exporter configuration
+nodeExporter:
+  enabled: true
+
+# kube-state-metrics configuration
+kubeStateMetrics:
+  enabled: true
+
+# Prometheus Adapter configuration
+prometheus-adapter:
+  enabled: true
+
+# KubeControllerManager configuration
+kubeControllerManager:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# KubeScheduler configuration
+kubeScheduler:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# KubeProxy configuration
+kubeProxy:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# CoreDNS configuration
+coreDns:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# KubeEtcd configuration
+kubeEtcd:
+  enabled: true
+  serviceMonitor:
+    enabled: true
