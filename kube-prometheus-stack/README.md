@@ -4,8 +4,6 @@ This directory contains the GitOps configuration for deploying kube-prometheus-s
 
 ## Files
 
-- `helm-release.yaml` - Defines the HelmRelease resource for kube-prometheus-stack
-- `helm-repository.yaml` - Defines the HelmRepository to fetch the chart from prometheus-community
 - `kustomization.yaml` - Kustomization file for the deployment
 - `values.yaml` - Helm values for configuring the kube-prometheus-stack chart
 
@@ -19,4 +17,4 @@ This configuration will deploy:
 
 ## Configuration
 
-The deployment uses the prometheus-community Helm chart version 50.3.1.
+The deployment uses the prometheus-community Helm chart version 92.2.0.
