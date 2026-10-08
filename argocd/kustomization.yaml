@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
 - install.yaml
 - repository-secret.yaml
+- ../apps/main-app.yaml
