@@ -47,12 +47,12 @@ spec:
             secretKeyRef:
               name: n8n-sandbox-credentials
               key: api-key
-        - name: SANDBOX_API_RUNNER_REGISTRATION_TOKEN
+        - name: SANDBOX_RUNNER_REGISTRATION_TOKEN
           valueFrom:
             secretKeyRef:
               name: n8n-sandbox-credentials
               key: runner-registration-token
-        - name: SANDBOX_API_RUNNER_API_KEY
+        - name: SANDBOX_RUNNER_API_KEYS
           valueFrom:
             secretKeyRef:
               name: n8n-sandbox-credentials
@@ -139,12 +139,12 @@ spec:
         - name: control-grpc
           containerPort: 9091
         env:
-        - name: SANDBOX_API_RUNNER_REGISTRATION_TOKEN
+        - name: SANDBOX_RUNNER_REGISTRATION_TOKEN
           valueFrom:
             secretKeyRef:
               name: n8n-sandbox-credentials
               key: runner-registration-token
-        - name: SANDBOX_API_RUNNER_API_KEY
+        - name: SANDBOX_RUNNER_API_KEYS
           valueFrom:
             secretKeyRef:
               name: n8n-sandbox-credentials
