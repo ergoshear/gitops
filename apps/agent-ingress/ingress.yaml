@@ -19,7 +19,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: hermes-fedora-44-service
+            name: hermes-dashboard
             port:
               number: 9119
   - host: n8n.ergoshear.dev
