@@ -23,6 +23,8 @@ patches:
     - op: add
       path: /spec/template/spec/containers/0/env
       value:
+      - name: HERMES_DASHBOARD
+        value: "1"
       - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
         valueFrom:
           secretKeyRef:
@@ -65,7 +67,7 @@ patches:
       path: /spec/template/spec/containers/0/volumeMounts
       value:
       - name: home
-        mountPath: /root/.hermes
+        mountPath: /opt/data
     - op: add
       path: /spec/template/spec/volumes
       value:
@@ -90,4 +92,4 @@ commonLabels:
 images:
 - name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/hermes-agent
-  newTag: "4583438"
+  newTag: "371a8b9"
