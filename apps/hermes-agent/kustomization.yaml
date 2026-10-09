@@ -6,6 +6,23 @@ namePrefix: hermes-
 resources:
 - ../base
 
+patches:
+- target:
+    kind: Deployment
+    name: fedora-44-deployment
+  patch: |-
+    - op: remove
+      path: /spec/template/spec/containers/0/ports
+- target:
+    kind: Service
+    name: fedora-44-service
+  patch: |-
+    $patch: delete
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: fedora-44-service
+
 commonLabels:
   agent: hermes
 
