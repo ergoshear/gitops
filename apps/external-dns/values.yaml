@@ -16,6 +16,7 @@ replicaCount: 1
 
 extraArgs:
   aws-zone-type: public
+  zone-id-filter: /hostedzone/Z10092751ZO7Q0B0TQ951
 
 env:
 - name: AWS_ACCESS_KEY_ID
