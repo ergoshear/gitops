@@ -14,6 +14,24 @@ patches:
     - op: replace
       path: /spec/template/spec/containers/0/ports/0/containerPort
       value: 5678
+- target:
+    kind: Deployment
+    name: fedora-44-deployment
+  patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/env
+      value:
+      - name: N8N_INSTANCE_AI_SANDBOX_ENABLED
+        value: "true"
+      - name: N8N_INSTANCE_AI_SANDBOX_PROVIDER
+        value: n8n-sandbox
+      - name: N8N_SANDBOX_SERVICE_URL
+        value: http://sandbox-api:8080
+      - name: N8N_SANDBOX_SERVICE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: sandbox-credentials
+            key: api-key
 
 commonLabels:
   agent: n8n
