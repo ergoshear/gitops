@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agent-hosts
+  annotations:
+    external-dns.alpha.kubernetes.io/enabled: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - hermes-agent.ergoshear.dev
+    - n8n.ergoshear.dev
+    secretName: ergoshear-dev-tls
+  rules:
+  - host: hermes-agent.ergoshear.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hermes-fedora-44-service
+            port:
+              number: 9119
+  - host: n8n.ergoshear.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: n8n-fedora-44-service
+            port:
+              number: 80

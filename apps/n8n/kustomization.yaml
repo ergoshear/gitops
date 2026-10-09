@@ -34,6 +34,13 @@ patches:
             key: api-key
       - name: N8N_INSTANCE_AI_SEARXNG_URL
         value: http://searxng:8080
+- target:
+    kind: Service
+    name: fedora-44-service
+  patch: |-
+    - op: replace
+      path: /spec/type
+      value: ClusterIP
 
 commonLabels:
   agent: n8n

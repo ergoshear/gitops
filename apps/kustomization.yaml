@@ -3,6 +3,10 @@ kind: Kustomization
 
 resources:
 - metallb
+- cert-manager
+- cert-manager-issuer
+- external-dns
+- agent-ingress
 - hermes-agent
 - pi-coder
 - n8n
