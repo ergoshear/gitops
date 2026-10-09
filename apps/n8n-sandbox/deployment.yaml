@@ -47,7 +47,7 @@ spec:
             secretKeyRef:
               name: n8n-sandbox-credentials
               key: api-key
-        - name: SANDBOX_RUNNER_REGISTRATION_TOKEN
+        - name: SANDBOX_API_RUNNER_REGISTRATION_TOKEN
           valueFrom:
             secretKeyRef:
               name: n8n-sandbox-credentials
