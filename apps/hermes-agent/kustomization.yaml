@@ -5,6 +5,7 @@ namePrefix: hermes-
 
 resources:
 - ../base
+- home.yaml
 
 patches:
 - target:
@@ -13,15 +14,75 @@ patches:
   patch: |-
     - op: remove
       path: /spec/template/spec/containers/0/ports
+    - op: add
+      path: /spec/template/spec/containers/0/ports
+      value:
+      - name: dashboard
+        containerPort: 9119
+        protocol: TCP
+    - op: add
+      path: /spec/template/spec/containers/0/env
+      value:
+      - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: hermes-dashboard-auth
+            key: username
+      - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: hermes-dashboard-auth
+            key: password
+      - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: hermes-dashboard-auth
+            key: session-secret
+    - op: add
+      path: /spec/template/spec/containers/0/startupProbe
+      value:
+        httpGet:
+          path: /api/status
+          port: dashboard
+        periodSeconds: 10
+        failureThreshold: 60
+    - op: add
+      path: /spec/template/spec/containers/0/readinessProbe
+      value:
+        httpGet:
+          path: /api/status
+          port: dashboard
+        periodSeconds: 10
+    - op: add
+      path: /spec/template/spec/containers/0/livenessProbe
+      value:
+        httpGet:
+          path: /api/status
+          port: dashboard
+        periodSeconds: 20
+        failureThreshold: 3
+    - op: add
+      path: /spec/template/spec/containers/0/volumeMounts
+      value:
+      - name: home
+        mountPath: /root/.hermes
+    - op: add
+      path: /spec/template/spec/volumes
+      value:
+      - name: home
+        persistentVolumeClaim:
+          claimName: home
 - target:
     kind: Service
     name: fedora-44-service
   patch: |-
-    $patch: delete
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: fedora-44-service
+    - op: replace
+      path: /spec/ports
+      value:
+      - name: dashboard
+        port: 9119
+        protocol: TCP
+        targetPort: dashboard
 
 commonLabels:
   agent: hermes
@@ -29,4 +90,4 @@ commonLabels:
 images:
 - name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/hermes-agent
-  newTag: aebc305
+  newTag: 7a5f3e6
