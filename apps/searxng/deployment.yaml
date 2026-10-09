@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+      - name: searxng
+        image: ghcr.io/searxng/searxng:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: SEARXNG_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: searxng-credentials
+              key: secret
+        - name: SEARXNG_BIND_ADDRESS
+          value: 0.0.0.0
+        - name: SEARXNG_LIMITER
+          value: "false"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 3
