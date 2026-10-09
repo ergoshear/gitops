@@ -81,16 +81,15 @@ patches:
     name: fedora-44-service
   patch: |-
     - op: replace
+      path: /metadata/name
+      value: dashboard
+    - op: replace
       path: /spec/ports
       value:
       - name: dashboard
         port: 9119
         protocol: TCP
         targetPort: dashboard
-- target:
-    kind: Service
-    name: fedora-44-service
-  patch: |-
     - op: replace
       path: /spec/type
       value: ClusterIP

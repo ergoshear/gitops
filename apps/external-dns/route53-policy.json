@@ -22,6 +22,8 @@
             "TXT"
           ],
           "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+            "a-hermes-agent.ergoshear.dev",
+            "a-n8n.ergoshear.dev",
             "hermes-agent.ergoshear.dev",
             "n8n.ergoshear.dev",
             "_acme-challenge.hermes-agent.ergoshear.dev",
