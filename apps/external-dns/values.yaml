@@ -1,0 +1,33 @@
+provider:
+  name: aws
+
+sources:
+- ingress
+
+domainFilters:
+- ergoshear.dev
+
+annotationFilter: external-dns.alpha.kubernetes.io/enabled=true
+
+policy: upsert-only
+registry: txt
+txtOwnerId: ergoshear-k3s
+replicaCount: 1
+
+extraArgs:
+  aws-zone-type: public
+  zone-id-filter: /hostedzone/Z10092751ZO7Q0B0TQ951
+
+env:
+- name: AWS_ACCESS_KEY_ID
+  valueFrom:
+    secretKeyRef:
+      name: route53-credentials
+      key: access-key-id
+- name: AWS_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: route53-credentials
+      key: secret-access-key
+- name: AWS_DEFAULT_REGION
+  value: us-east-1
