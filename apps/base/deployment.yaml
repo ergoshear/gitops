@@ -14,15 +14,9 @@ spec:
         app: fedora-44
     spec:
       containers:
-      - name: fedora-container
-        image: fedora:latest
+      - name: agent
+        image: ghcr.io/ergoshear/agent:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
-        command: ["/bin/bash", "-c"]
-        args:
-        - |
-          echo "Fedora 44 deployment running"
-          while true; do
-            sleep 3600
-          done
+        - name: http
+          containerPort: 80

@@ -6,10 +6,19 @@ namePrefix: n8n-
 resources:
 - ../base
 
+patches:
+- target:
+    kind: Deployment
+    name: fedora-44-deployment
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/ports/0/containerPort
+      value: 5678
+
 commonLabels:
   agent: n8n
 
 images:
-- name: ghcr.io/ergoshear/n8n
+- name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/n8n
   newTag: 367afc5

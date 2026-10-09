@@ -10,6 +10,6 @@ commonLabels:
   agent: hermes
 
 images:
-- name: ghcr.io/ergoshear/hermes-agent
+- name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/hermes-agent
   newTag: b169239

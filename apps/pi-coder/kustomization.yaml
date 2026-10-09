@@ -10,6 +10,6 @@ commonLabels:
   agent: pi-coder
 
 images:
-- name: ghcr.io/ergoshear/pi-coder
+- name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/pi-coder
   newTag: 753875b
