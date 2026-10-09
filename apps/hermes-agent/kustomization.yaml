@@ -25,6 +25,8 @@ patches:
       value:
       - name: HERMES_DASHBOARD
         value: "1"
+      - name: LM_BASE_URL
+        value: http://192.168.202.17:1234/v1
       - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
         valueFrom:
           secretKeyRef:
