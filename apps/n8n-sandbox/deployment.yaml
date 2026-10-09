@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
       - name: bootstrap-mtls
-        image: ghcr.io/n8n-io/n8n-sandbox-service-api:v1.7.0
+        image: ghcr.io/n8n-io/n8n-sandbox-service-api:1.7.0
         imagePullPolicy: IfNotPresent
         command: [sh, -c]
         args:
@@ -34,7 +34,7 @@ spec:
           mountPath: /tls
       containers:
       - name: api
-        image: ghcr.io/n8n-io/n8n-sandbox-service-api:v1.7.0
+        image: ghcr.io/n8n-io/n8n-sandbox-service-api:1.7.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -115,7 +115,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       initContainers:
       - name: wait-for-mtls
-        image: ghcr.io/n8n-io/n8n-sandbox-service-api:v1.7.0
+        image: ghcr.io/n8n-io/n8n-sandbox-service-api:1.7.0
         imagePullPolicy: IfNotPresent
         command: [sh, -c]
         args:
@@ -129,7 +129,7 @@ spec:
           readOnly: true
       containers:
       - name: runner
-        image: ghcr.io/n8n-io/n8n-sandbox-service-runner-dind:v1.7.0
+        image: ghcr.io/n8n-io/n8n-sandbox-service-runner-dind:1.7.0
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
@@ -160,7 +160,7 @@ spec:
         - name: SANDBOX_RUNNER_ID
           value: runner-1
         - name: SANDBOX_RUNNER_DOCKER_SANDBOX_IMAGE
-          value: ghcr.io/n8n-io/n8n-sandbox-service-sandbox:v1.7.0
+          value: ghcr.io/n8n-io/n8n-sandbox-service-sandbox:1.7.0
         - name: SANDBOX_RUNNER_REGISTRATION_GRPC_CA_FILE
           value: /tls/runner/ca.crt
         - name: SANDBOX_RUNNER_REGISTRATION_GRPC_CERT_FILE
