@@ -14,11 +14,8 @@ patches:
     - op: remove
       path: /spec/template/spec/containers/0/ports
     - op: add
-      path: /spec/template/spec/containers/0/stdin
-      value: true
-    - op: add
-      path: /spec/template/spec/containers/0/tty
-      value: true
+      path: /spec/template/spec/containers/0/command
+      value: ["sleep", "infinity"]
 - target:
     kind: Service
     name: fedora-44-service
