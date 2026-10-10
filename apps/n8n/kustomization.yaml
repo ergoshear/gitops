@@ -48,4 +48,4 @@ commonLabels:
 images:
 - name: ghcr.io/ergoshear/agent
   newName: ghcr.io/ergoshear/n8n
-  newTag: 367afc5
+  newTag: latest

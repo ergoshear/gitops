@@ -109,8 +109,17 @@ new password to the Linux account. Pi's workspace and home directory are
 currently ephemeral.
 
 Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
-image before syncing this overlay. The overlay pins the image's short commit
-tag, so the deployment revision changes when the image reference is updated.
+image before syncing this overlay.
+
+## App image updates
+
+The Hermes, Pi Coder, and n8n overlays all track their respective
+`ghcr.io/ergoshear` images with the `latest` tag and `imagePullPolicy: Always`.
+New pods pull the current image. Publishing a new `latest` image does not
+change the Deployment manifest or automatically restart existing pods;
+restart the relevant Deployment after publishing to roll out the update.
+Third-party app images and Helm-managed infrastructure retain their existing
+version settings.
 
 ## Agent DNS/TLS
 
