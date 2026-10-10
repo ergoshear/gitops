@@ -1,5 +1,20 @@
 # gitops
 
+## kubectl from another machine
+
+Install Tailscale on the machine and sign in to this tailnet as the Kubernetes
+user you want to use. Then generate a kubeconfig context for the API proxy:
+
+```powershell
+tailscale configure kubeconfig k3s-api.tailb11f97.ts.net
+kubectl --context k3s-api.tailb11f97.ts.net auth whoami
+kubectl --context k3s-api.tailb11f97.ts.net get nodes
+```
+
+This adds the Tailscale API proxy to that machine's kubeconfig. Kubernetes
+permissions follow the signed-in Tailscale identity and its RBAC bindings; no
+cluster-admin certificate needs to be copied between machines.
+
 ## ArgoCD Helm Support
 
 The kube-prometheus-stack Kustomize build uses Helm chart inflation. Argo CD must be configured to pass `--enable-helm` to Kustomize through the `argocd-cm` ConfigMap. The `argocd/` overlay configures this with `kustomize.buildOptions`.
