@@ -12,6 +12,11 @@ patches:
     kind: Deployment
     name: fedora-44-deployment
   patch: |-
+    # The hermes-dashboard Service would otherwise inject
+    # HERMES_DASHBOARD_PORT=tcp://..., which Hermes parses as its port.
+    - op: add
+      path: /spec/template/spec/enableServiceLinks
+      value: false
     - op: remove
       path: /spec/template/spec/containers/0/ports
     - op: add
