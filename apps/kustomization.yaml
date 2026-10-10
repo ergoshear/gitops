@@ -6,6 +6,7 @@ resources:
 - cert-manager
 - cert-manager-issuer
 - external-dns
+- tailscale-operator
 - agent-ingress
 - hermes-agent
 - pi-coder

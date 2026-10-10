@@ -29,6 +29,31 @@ kubectl rollout restart deployment/argocd-server -n argocd
 kubectl rollout status deployment/argocd-server -n argocd
 ```
 
+## K3s API access over Tailscale
+
+`apps/tailscale-operator/` installs the Tailscale Kubernetes Operator with its
+in-process API server proxy. The proxy uses the `k3s-api` hostname and
+authenticates requests as the connecting Tailscale identity; it does not grant
+Kubernetes permissions by itself.
+
+Before syncing the app:
+
+- Enable MagicDNS and HTTPS certificates for the tailnet.
+- Configure the tailnet ACL to allow the intended users or groups to reach
+	`tag:k8s-operator` on TCP port 443. Ensure the operator tag can be assigned
+	by the OAuth client and retain existing ownership rules for `tag:k8s`.
+- Create a Tailscale OAuth client with write access to Services, Devices/Core,
+	and Keys/Auth Keys, scoped to `tag:k8s-operator`.
+- Create the `operator-oauth` Secret in the `tailscale` namespace with keys
+	`client_id` and `client_secret` using the secure credential workflow. Do
+	not commit OAuth credentials to this repository. Create the namespace first
+	with `kubectl apply -f apps/tailscale-operator/namespace.yaml`.
+
+After the operator is ready, find the `k3s-api` MagicDNS name in the Tailscale
+admin console and run `tailscale configure kubeconfig <proxy-MagicDNS-name>`.
+Grant the desired Kubernetes RBAC to the corresponding Tailscale login or
+group separately; avoid granting cluster-admin to the whole tailnet.
+
 ## Fedora 44 Deployment
 
 A Fedora 44 container deployment has been added to this GitOps setup. The deployment can be managed through ArgoCD and includes:
