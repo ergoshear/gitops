@@ -11,7 +11,7 @@ discovery:
   static:
     endpoints:
     - name: ollama
-      url: "http://192.168.1.10:11434"
+      url: "http://mlops-node-7.lan:8080"
       type: ollama
       priority: 100
       model_url: /api/tags

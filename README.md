@@ -134,7 +134,7 @@ The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
 OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
-`apps/olla/config.yaml` discovers models from Ollama at `192.168.1.10:11434`
+`apps/olla/config.yaml` discovers models from Ollama at `mlops-node-7.lan:8080`
 and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
 (the equivalent of least-busy). The `llama3` alias accepts Ollama's
 `llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
