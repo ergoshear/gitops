@@ -1,5 +1,19 @@
 # gitops
 
+## Pull request validation
+
+The **Kustomize lint** workflow renders every tracked Kustomize overlay on
+pull requests and pushes to `main`, and can also be run manually. It uses
+kubectl v1.37.1's bundled Kustomize and Helm v3.19.0 with `--enable-helm`,
+matching the Helm-enabled rendering required by Argo CD. A failed render
+fails the check, while all overlays are still attempted for useful diagnostics.
+
+This checks manifest composition and Helm rendering without cluster credentials
+or applying resources. It does not check live-cluster readiness or validate
+custom resources against installed CRD schemas. To reproduce a specific check
+locally, run `kubectl kustomize <overlay-directory> --enable-helm` with Helm
+available on your PATH.
+
 ## kubectl from another machine
 
 Install Tailscale on the machine and sign in to this tailnet as the Kubernetes
