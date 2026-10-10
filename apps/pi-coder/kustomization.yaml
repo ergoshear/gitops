@@ -18,11 +18,21 @@ patches:
         containerPort: 9090
         protocol: TCP
     - op: add
+      path: /spec/template/spec/containers/0/securityContext
+      value:
+        privileged: true
+    - op: add
       path: /spec/template/spec/containers/0/volumeMounts
       value:
       - name: login
         mountPath: /run/secrets/pi-coder
         readOnly: true
+      - name: run
+        mountPath: /run
+      - name: tmp
+        mountPath: /tmp
+      - name: cgroup
+        mountPath: /sys/fs/cgroup
     - op: add
       path: /spec/template/spec/volumes
       value:
@@ -33,6 +43,16 @@ patches:
           items:
           - key: password
             path: password
+      - name: run
+        emptyDir:
+          medium: Memory
+      - name: tmp
+        emptyDir:
+          medium: Memory
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
     - op: add
       path: /spec/template/spec/containers/0/startupProbe
       value:
