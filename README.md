@@ -21,6 +21,14 @@ ExternalDNS creates the public Route 53 record, and cert-manager issues the
 TLS certificate with the `letsencrypt-prod` DNS-01 issuer. TLS terminates at
 Traefik; Argo CD runs in insecure mode behind the ingress.
 
+Apply the overlay and restart the server to load the configuration change:
+
+```powershell
+kubectl apply -k argocd
+kubectl rollout restart deployment/argocd-server -n argocd
+kubectl rollout status deployment/argocd-server -n argocd
+```
+
 ## Fedora 44 Deployment
 
 A Fedora 44 container deployment has been added to this GitOps setup. The deployment can be managed through ArgoCD and includes:
