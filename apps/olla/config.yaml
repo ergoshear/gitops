@@ -10,12 +10,12 @@ discovery:
   type: static
   static:
     endpoints:
-    - name: ollama
+    - name: llamacpp
       url: "http://mlops-node-7.lan:8080"
-      type: ollama
+      type: llamacpp
       priority: 100
-      model_url: /api/tags
-      health_check_url: /
+      model_url: /v1/models
+      health_check_url: /health
       check_interval: 10s
       check_timeout: 5s
     - name: lm-studio
@@ -40,6 +40,8 @@ model_registry:
     type: strict
 
 model_aliases:
+  gpt-oss-20b:
+  - /models/gpt-oss-20b-MXFP4.gguf
   llama3:
   - llama3:latest
   - llama3
