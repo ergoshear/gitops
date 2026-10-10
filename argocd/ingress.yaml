@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  annotations:
+    external-dns.alpha.kubernetes.io/enabled: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - argocd.ergoshear.dev
+    secretName: argocd-ergoshear-dev-tls
+  rules:
+  - host: argocd.ergoshear.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 80

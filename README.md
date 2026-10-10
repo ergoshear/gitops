@@ -14,6 +14,13 @@ kubectl rollout restart deployment/argocd-repo-server -n argocd
 
 This setting applies to Kustomize builds performed by the Argo CD repo-server; `--enable-helm` is not an `argocd-server` command-line flag.
 
+## Argo CD HTTPS access
+
+The Argo CD UI is exposed at `https://argocd.ergoshear.dev` through Traefik.
+ExternalDNS creates the public Route 53 record, and cert-manager issues the
+TLS certificate with the `letsencrypt-prod` DNS-01 issuer. TLS terminates at
+Traefik; Argo CD runs in insecure mode behind the ingress.
+
 ## Fedora 44 Deployment
 
 A Fedora 44 container deployment has been added to this GitOps setup. The deployment can be managed through ArgoCD and includes:
