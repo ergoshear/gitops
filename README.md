@@ -131,7 +131,7 @@ image before syncing this overlay.
 with a ClusterIP Service on port 40114. The shared Traefik ingress, ExternalDNS,
 and cert-manager certificate expose `https://olla.ergoshear.dev`.
 The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
-OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/v1`.
+OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers models from Ollama at `192.168.1.10:11434`
