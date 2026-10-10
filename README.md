@@ -125,6 +125,29 @@ currently ephemeral.
 Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
 image before syncing this overlay.
 
+## Olla
+
+`apps/olla/` deploys `ghcr.io/thushan/olla:latest` in the `agents` namespace,
+with a ClusterIP Service on port 40114. The shared Traefik ingress, ExternalDNS,
+and cert-manager certificate expose `https://olla.ergoshear.dev`.
+The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
+OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/v1`.
+
+Olla uses its native configuration, not LiteLLM's `model_list` schema.
+`apps/olla/config.yaml` discovers models from Ollama at `192.168.1.10:11434`
+and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
+(the equivalent of least-busy). The `llama3` alias accepts Ollama's
+`llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
+a different model ID. The `lm-studio` bearer token is the supplied placeholder,
+not a production secret. Real credentials must be provided through a Kubernetes
+Secret rather than committed to Git.
+
+The dashboard has no authentication. Its allowlist admits private-network
+connections and the Olla hostname; behind Traefik it sees the proxy's address,
+not the original client. Keep this ingress private like the other agent apps,
+or add authentication at the ingress before making it publicly reachable.
+ConfigMap changes trigger a rollout through Kustomize's generated name hash.
+
 ## App image updates
 
 The Hermes, Pi Coder, and n8n overlays all track their respective

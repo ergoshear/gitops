@@ -1,0 +1,57 @@
+server:
+  host: "0.0.0.0"
+  port: 40114
+
+proxy:
+  engine: olla
+  load_balancer: least-connections
+
+discovery:
+  type: static
+  static:
+    endpoints:
+    - name: ollama
+      url: "http://192.168.1.10:11434"
+      type: ollama
+      priority: 100
+      model_url: /api/tags
+      health_check_url: /
+      check_interval: 10s
+      check_timeout: 5s
+    - name: lm-studio
+      url: "http://192.168.1.12:1234"
+      type: lm-studio
+      priority: 100
+      model_url: /v1/models
+      health_check_url: /v1/models
+      check_interval: 10s
+      check_timeout: 5s
+      auth:
+        type: bearer
+        token: lm-studio
+  model_discovery:
+    enabled: true
+    interval: 5m
+
+model_registry:
+  type: memory
+  enable_unifier: true
+  routing_strategy:
+    type: strict
+
+model_aliases:
+  llama3:
+  - llama3:latest
+  - llama3
+
+dashboard:
+  enabled: true
+  access_policy:
+    allowed_cidrs:
+    - "127.0.0.0/8"
+    - "10.0.0.0/8"
+    - "172.16.0.0/12"
+    - "192.168.0.0/16"
+    allowed_hosts:
+    - localhost
+    - olla.ergoshear.dev
