@@ -1,0 +1,60 @@
+name: Kustomize lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kustomize-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    name: Render all Kustomize overlays
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out manifests
+        uses: actions/checkout@v4
+
+      - name: Install kubectl with Kustomize
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.37.1
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.1
+        with:
+          version: v3.19.0
+
+      - name: Render every overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          count=0
+          while IFS= read -r -d '' manifest; do
+            directory="$(dirname "$manifest")"
+            echo "::group::Render $directory"
+            if kubectl kustomize "$directory" --enable-helm > /dev/null; then
+              echo "Rendered $directory successfully."
+            else
+              echo "::error file=$manifest::Failed to render $directory."
+              failed=1
+            fi
+            echo "::endgroup::"
+            count=$((count + 1))
+          done < <(git ls-files -z -- \
+            '*kustomization.yaml' '*kustomization.yml' '*Kustomization')
+          if ((count == 0)); then
+            echo "::error::No tracked Kustomize overlays were found."
+            exit 1
+          fi
+          echo "Validated $count overlays."
+          exit "$failed"
