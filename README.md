@@ -137,7 +137,11 @@ Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers models from llama.cpp at `mlops-node-7.lan:8080`
 and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
 (the equivalent of least-busy). The `gpt-oss-20b` alias maps to llama.cpp's
-`/models/gpt-oss-20b-MXFP4.gguf` model ID. The `llama3` alias accepts Ollama's
+`/models/gpt-oss-20b-MXFP4.gguf` model ID. A second llama.cpp backend at
+`mlops-node-4.lan:8080` serves `Qwen3-Coder-Next-Q4_K_M.gguf` with the API
+model ID `qwen3-coder-next`. Its currently configured context window is 4096
+tokens; clients should use that runtime limit rather than the training limit.
+The `llama3` alias accepts Ollama's
 `llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
 a different model ID. The `lm-studio` bearer token is the supplied placeholder,
 not a production secret. Real credentials must be provided through a Kubernetes

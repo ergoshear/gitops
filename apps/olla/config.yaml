@@ -10,7 +10,7 @@ discovery:
   type: static
   static:
     endpoints:
-    - name: llamacpp
+    - name: llamacpp-node-7
       url: "http://mlops-node-7.lan:8080"
       type: llamacpp
       priority: 100
@@ -18,12 +18,12 @@ discovery:
       health_check_url: /health
       check_interval: 10s
       check_timeout: 5s
-    - name: lm-studio
-      url: "http://192.168.1.12:1234"
-      type: lm-studio
+    - name: llamacpp-node-4
+      url: "http://mlops-node-4.lan:8080"
+      type: llamacpp
       priority: 100
       model_url: /v1/models
-      health_check_url: /v1/models
+      health_check_url: /health
       check_interval: 10s
       check_timeout: 5s
       auth:
