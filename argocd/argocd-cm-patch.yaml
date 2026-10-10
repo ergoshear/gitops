@@ -4,4 +4,3 @@ metadata:
   name: argocd-cm
 data:
   kustomize.buildOptions: --enable-helm
-  server.insecure: "true"

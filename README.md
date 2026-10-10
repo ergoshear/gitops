@@ -62,9 +62,11 @@ authoritative and create an AWS IAM identity with Route 53 permissions limited
 to that zone. Create the controller namespaces, then create a Kubernetes Secret
 named `route53-credentials` in both namespaces. Each Secret must contain the
 keys `access-key-id` and `secret-access-key`. Do not commit AWS credentials to
-this repository. ExternalDNS is restricted to the public zone, `ergoshear.dev`,
-Ingresses carrying its opt-in annotation, and upsert-only changes. cert-manager
-needs to create and remove TXT challenge records in the same hosted zone.
+this repository. The IAM policy in `apps/external-dns/route53-policy.json`
+allows record changes throughout this hosted zone. ExternalDNS itself is
+configured for the public `ergoshear.dev` zone, Ingresses carrying its opt-in
+annotation, and upsert-only changes. cert-manager needs to create and remove
+TXT challenge records in the same hosted zone.
 
 Install cert-manager first so its CRDs exist before applying the ClusterIssuer
 and Ingress resources:

@@ -13,24 +13,7 @@
       "Action": [
         "route53:ChangeResourceRecordSets"
       ],
-      "Resource": "arn:aws:route53:::hostedzone/Z10092751ZO7Q0B0TQ951",
-      "Condition": {
-        "ForAllValues:StringEquals": {
-          "route53:ChangeResourceRecordSetsRecordTypes": [
-            "A",
-            "AAAA",
-            "TXT"
-          ],
-          "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
-            "a-hermes-agent.ergoshear.dev",
-            "a-n8n.ergoshear.dev",
-            "hermes-agent.ergoshear.dev",
-            "n8n.ergoshear.dev",
-            "_acme-challenge.hermes-agent.ergoshear.dev",
-            "_acme-challenge.n8n.ergoshear.dev"
-          ]
-        }
-      }
+      "Resource": "arn:aws:route53:::hostedzone/Z10092751ZO7Q0B0TQ951"
     },
     {
       "Effect": "Allow",
