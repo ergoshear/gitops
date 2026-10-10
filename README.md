@@ -87,10 +87,44 @@ To deploy:
 kubectl apply -k apps
 ```
 
-## Hermes and n8n DNS/TLS
+## Pi Coder Cockpit
 
-K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev` and
-`n8n.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
+`https://pi.ergoshear.dev` exposes Cockpit's terminal for the Pi Coder
+container. Log in as `pi`; this account has passwordless sudo inside the
+container. The internal SSH server listens on loopback only, and the
+Cockpit Service is ClusterIP with TLS terminated at Traefik.
+
+Before syncing `apps/pi-coder`, create the `pi-coder-login` Secret in the
+`agents` namespace with a nonempty `password` key. Use a protected local
+file rather than putting the password in shell arguments or Git:
+
+```sh
+kubectl -n agents create secret generic pi-coder-login \
+  --from-file=password=/path/to/protected/password-file
+```
+
+The password file must contain a single line. The pod requires this Secret
+to start. Restart the deployment after rotating the Secret to apply the
+new password to the Linux account. Pi's workspace and home directory are
+currently ephemeral.
+
+Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
+image before syncing this overlay.
+
+## App image updates
+
+The Hermes, Pi Coder, and n8n overlays all track their respective
+`ghcr.io/ergoshear` images with the `latest` tag and `imagePullPolicy: Always`.
+New pods pull the current image. Publishing a new `latest` image does not
+change the Deployment manifest or automatically restart existing pods;
+restart the relevant Deployment after publishing to roll out the update.
+Third-party app images and Helm-managed infrastructure retain their existing
+version settings.
+
+## Agent DNS/TLS
+
+K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,
+`n8n.ergoshear.dev`, and `pi.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
 Route 53 hosted zone, and cert-manager obtains and renews a Let's Encrypt
 certificate using Route 53 DNS-01 challenges. The public A records resolve to
 Traefik's private MetalLB address, so the applications remain reachable only
