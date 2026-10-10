@@ -109,9 +109,8 @@ new password to the Linux account. Pi's workspace and home directory are
 currently ephemeral.
 
 Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
-image before syncing this overlay. It uses `latest` with `imagePullPolicy:
-Always` so it picks up the published image when a pod starts; image updates
-alone do not restart an existing pod.
+image before syncing this overlay. The overlay pins the image's short commit
+tag, so the deployment revision changes when the image reference is updated.
 
 ## Agent DNS/TLS
 
