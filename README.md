@@ -153,6 +153,8 @@ and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
 `mlops-node-4.lan:8080` serves `Qwen3-Coder-Next-Q4_K_M.gguf` with the API
 model ID `qwen3-coder-next`. Its currently configured context window is 4096
 tokens; clients should use that runtime limit rather than the training limit.
+Hermes (`OLLA_MODEL`) and n8n (`N8N_INSTANCE_AI_MODEL`) explicitly select
+`/models/gpt-oss-20b-MXFP4.gguf` through the Olla OpenAI-compatible endpoint.
 The `llama3` alias accepts Ollama's
 `llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
 a different model ID. The `lm-studio` bearer token is the supplied placeholder,
