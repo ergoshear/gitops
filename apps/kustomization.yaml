@@ -9,7 +9,7 @@ resources:
 - tailscale-operator
 - agent-ingress
 - hermes-agent
-- pi-coder
+- code-server
 - n8n
 - n8n-sandbox
 - searxng

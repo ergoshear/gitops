@@ -10,7 +10,7 @@ spec:
   - hosts:
     - hermes-agent.ergoshear.dev
     - n8n.ergoshear.dev
-    - pi.ergoshear.dev
+    - code.ergoshear.dev
     - olla.ergoshear.dev
     secretName: ergoshear-dev-tls
   rules:
@@ -34,16 +34,16 @@ spec:
             name: n8n-fedora-44-service
             port:
               number: 80
-  - host: pi.ergoshear.dev
+  - host: code.ergoshear.dev
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: pi-coder-fedora-44-service
+            name: vscode-service
             port:
-              number: 9090
+              number: 80
   - host: olla.ergoshear.dev
     http:
       paths:

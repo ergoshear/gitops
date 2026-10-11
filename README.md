@@ -94,21 +94,23 @@ A Fedora 44 container deployment has been added to this GitOps setup. The deploy
 The deployment is structured with:
 - `apps/base/` - Base manifests for Fedora 44 deployment
 - `apps/hermes-agent/` - Overlay for Hermes agent configuration
-- `apps/pi-coder/` - Overlay for Pi Coder configuration
+- `apps/code-server/` - Standalone code-server deployment and persistent workspace
 
 To deploy:
 ```powershell
 kubectl apply -k apps
 ```
 
-## Pi Coder Cockpit
+## VS Code in the browser
 
-`https://pi.ergoshear.dev` exposes Cockpit's terminal for the Pi Coder
-container. Log in as `pi`; this account has passwordless sudo inside the
-container. The internal SSH server listens on loopback only, and the
-Cockpit Service is ClusterIP with TLS terminated at Traefik.
+`https://code.ergoshear.dev` exposes stock `codercom/code-server:latest`,
+replacing Pi Coder and Cockpit. The `vscode-service` Service is ClusterIP on
+port 80, forwarding to code-server on port 8080, with TLS terminated at
+Traefik. Password authentication is enabled; there is no Linux username login.
+The container runs as UID/GID 1000 without privileged access or host mounts.
 
-Before syncing `apps/pi-coder`, create the `pi-coder-login` Secret in the
+The deployment reuses the existing `pi-coder-login` Secret. Before syncing
+`apps/code-server`, ensure this Secret exists in the
 `agents` namespace with a nonempty `password` key. Use a protected local
 file rather than putting the password in shell arguments or Git:
 
@@ -118,12 +120,22 @@ kubectl -n agents create secret generic pi-coder-login \
 ```
 
 The password file must contain a single line. The pod requires this Secret
-to start. Restart the deployment after rotating the Secret to apply the
-new password to the Linux account. Pi's workspace and home directory are
-currently ephemeral.
+to start. Restart `vscode-web` after rotating the Secret to load the new
+password.
 
-Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
-image before syncing this overlay.
+The `vscode-pvc` ReadWriteOnce claim requests 100Gi using the cluster's default
+StorageClass and persists `/home/coder/project`, the default workspace.
+Settings and extensions outside this directory remain ephemeral. The
+deployment uses `Recreate` to avoid concurrent pods sharing the workspace.
+K3s local-path storage is node-local; ensure the selected node has sufficient
+disk space. Its storage request is not a disk quota, and the current
+StorageClass does not support volume expansion.
+
+Argo CD's automated pruning removes the old Pi Coder Deployment and Service
+when this replacement syncs. Copy any needed files out of the old ephemeral
+Pi workspace before syncing. The stock image does not include the Pi CLI or
+its model configuration. This also replaces the old `pi.ergoshear.dev`
+ingress and certificate name; use `code.ergoshear.dev` after sync.
 
 ## Olla
 
@@ -155,13 +167,15 @@ ConfigMap changes trigger a rollout through Kustomize's generated name hash.
 
 ## App image updates
 
-The Hermes, Pi Coder, and n8n overlays all track their respective
+The Hermes and n8n overlays track their respective
 `ghcr.io/ergoshear` images with the `latest` tag and `imagePullPolicy: Always`.
 New pods pull the current image. Publishing a new `latest` image does not
 change the Deployment manifest or automatically restart existing pods;
 restart the relevant Deployment after publishing to roll out the update.
 Third-party app images and Helm-managed infrastructure retain their existing
-version settings.
+version settings. Code-server tracks `codercom/code-server:latest` with
+`imagePullPolicy: Always`; restart `vscode-web` to pick up a newly published
+image.
 
 ### Hermes dashboard port
 
@@ -175,7 +189,7 @@ continue to use port 9119, and dashboard authentication remains enabled.
 ## Agent DNS/TLS
 
 K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,
-`n8n.ergoshear.dev`, and `pi.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
+`n8n.ergoshear.dev`, and `code.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
 Route 53 hosted zone, and cert-manager obtains and renews a Let's Encrypt
 certificate using Route 53 DNS-01 challenges. The public A records resolve to
 Traefik's private MetalLB address, so the applications remain reachable only
