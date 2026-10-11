@@ -146,23 +146,41 @@ The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
 OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
-`apps/olla/config.yaml` discovers models from llama.cpp at `mlops-node-7.lan:8080`
-and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
-(the equivalent of least-busy). The `gpt-oss-20b` alias maps to llama.cpp's
-`/models/gpt-oss-20b-MXFP4.gguf` model ID. A second llama.cpp backend at
-`mlops-node-4.lan:8080` serves `Qwen3-Coder-Next-Q4_K_M.gguf` with the API
-model ID `qwen3-coder-next`. Its currently configured context window is 4096
-tokens; clients should use that runtime limit rather than the training limit.
-The `llama3` alias accepts Ollama's
-`llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
-a different model ID. The `lm-studio` bearer token is the supplied placeholder,
-not a production secret. Real credentials must be provided through a Kubernetes
-Secret rather than committed to Git.
+`apps/olla/config.yaml` discovers Qwen3-Coder-Next from the in-cluster
+`qwen3-coder-next` Service using `least-connections` balancing. The deployment
+pins inference to `mlops-node-7.lan`, requests its AMD GPU through Kubernetes,
+and downloads the Q4_K_M model into persistent storage on first startup. Its
+configured context is 262144 tokens; actual startup depends on available GPU
+memory for model weights, KV cache, and compute buffers.
+
+The pod tolerates the `dedicated=qwen3-coder-next:NoSchedule` taint. To reserve
+the node for this workload, configure that taint on `mlops-node-7.lan` through
+the node's K3s agent configuration before syncing this app. A `NoSchedule`
+taint blocks future ordinary pods but does not evict pods already running there;
+move existing workloads off the node as part of the reservation. The pod's
+required node selector keeps it on `mlops-node-7.lan` even if the taint is
+removed.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,
 not the original client. Keep this ingress private like the other agent apps,
 or add authentication at the ingress before making it publicly reachable.
+
+## GPU device plugins
+
+`apps/gpu-device-plugins/` deploys NVIDIA's device plugin to nodes labeled
+`hardware.gpu=nvidia` and AMD's ROCm device plugin to nodes labeled
+`hardware.gpu=amd`. Kubernetes then reports GPUs as extended resources
+`nvidia.com/gpu` and `amd.com/gpu`; workloads request a GPU in their container
+resource limits. The NVIDIA chart is pinned to 0.17.1. The AMD plugin is pinned
+to 1.31.0.10 and gets host KFD/DRI access for device discovery. Neither plugin
+installs or updates host kernel drivers; those remain managed by the node OS and
+Salt.
+
+Qwen3-Coder-Next requests one `amd.com/gpu`, so it waits for the AMD plugin to
+register the Strix Halo GPU before scheduling. Its container receives the
+device through Kubernetes instead of privileged mode and direct host device
+mounts. The AMD plugin DaemonSet also tolerates the Qwen node's dedicated taint.
 ConfigMap changes trigger a rollout through Kustomize's generated name hash.
 
 ## App image updates
