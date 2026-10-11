@@ -35,7 +35,7 @@ spec:
         - name: GPU_LAYERS
           value: "56"
         - name: CTX_SIZE
-          value: "262144"
+          value: "65536"
         - name: PARALLEL
           value: "1"
         ports:
