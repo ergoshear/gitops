@@ -43,20 +43,6 @@ spec:
           value: "128"
         - name: UBATCH_SIZE
           value: "64"
-        - name: THREADS
-          value: "16"
-        - name: CACHE_TYPE_K
-          value: q4_0
-        - name: CACHE_TYPE_V
-          value: q4_0
-        - name: FLASH_ATTN
-          value: "on"
-        - name: TEMP
-          value: "0.15"
-        - name: TOP_P
-          value: "0.95"
-        - name: TOP_K
-          value: "20"
         ports:
         - name: http
           containerPort: 8080
