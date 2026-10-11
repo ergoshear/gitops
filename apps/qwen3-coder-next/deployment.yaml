@@ -35,6 +35,31 @@ spec:
       - name: llama-server
         image: ghcr.io/ergoshear/qwen3-coder-next:latest
         imagePullPolicy: Always
+        env:
+        - name: GPU_LAYERS
+          value: "99"
+        - name: CTX_SIZE
+          value: "65536"
+        - name: PARALLEL
+          value: "1"
+        - name: THREADS
+          value: "8"
+        - name: BATCH_SIZE
+          value: "256"
+        - name: UBATCH_SIZE
+          value: "128"
+        - name: CACHE_TYPE_K
+          value: q4_0
+        - name: CACHE_TYPE_V
+          value: q4_0
+        - name: FLASH_ATTN
+          value: "on"
+        - name: TEMP
+          value: "1.0"
+        - name: TOP_P
+          value: "0.95"
+        - name: TOP_K
+          value: "40"
         ports:
         - name: http
           containerPort: 8080
