@@ -32,7 +32,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: CTX_SIZE
-          value: "262144"
+          value: "65536"
         - name: PARALLEL
           value: "1"
         - name: GPU_LAYERS
