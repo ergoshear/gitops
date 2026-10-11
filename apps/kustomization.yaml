@@ -7,9 +7,10 @@ resources:
 - cert-manager-issuer
 - external-dns
 - tailscale-operator
+- traefik-tailscale
 - agent-ingress
 - hermes-agent
-- pi-coder
+- code-server
 - n8n
 - n8n-sandbox
 - searxng

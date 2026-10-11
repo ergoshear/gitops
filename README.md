@@ -94,21 +94,23 @@ A Fedora 44 container deployment has been added to this GitOps setup. The deploy
 The deployment is structured with:
 - `apps/base/` - Base manifests for Fedora 44 deployment
 - `apps/hermes-agent/` - Overlay for Hermes agent configuration
-- `apps/pi-coder/` - Overlay for Pi Coder configuration
+- `apps/code-server/` - Standalone code-server deployment and persistent workspace
 
 To deploy:
 ```powershell
 kubectl apply -k apps
 ```
 
-## Pi Coder Cockpit
+## VS Code in the browser
 
-`https://pi.ergoshear.dev` exposes Cockpit's terminal for the Pi Coder
-container. Log in as `pi`; this account has passwordless sudo inside the
-container. The internal SSH server listens on loopback only, and the
-Cockpit Service is ClusterIP with TLS terminated at Traefik.
+`https://code.ergoshear.dev` exposes stock `codercom/code-server:latest`,
+replacing Pi Coder and Cockpit. The `vscode-service` Service is ClusterIP on
+port 80, forwarding to code-server on port 8080, with TLS terminated at
+Traefik. Password authentication is enabled; there is no Linux username login.
+The container runs as UID/GID 1000 without privileged access or host mounts.
 
-Before syncing `apps/pi-coder`, create the `pi-coder-login` Secret in the
+The deployment reuses the existing `pi-coder-login` Secret. Before syncing
+`apps/code-server`, ensure this Secret exists in the
 `agents` namespace with a nonempty `password` key. Use a protected local
 file rather than putting the password in shell arguments or Git:
 
@@ -118,12 +120,22 @@ kubectl -n agents create secret generic pi-coder-login \
 ```
 
 The password file must contain a single line. The pod requires this Secret
-to start. Restart the deployment after rotating the Secret to apply the
-new password to the Linux account. Pi's workspace and home directory are
-currently ephemeral.
+to start. Restart `vscode-web` after rotating the Secret to load the new
+password.
 
-Merge and successfully publish the Cockpit-enabled `ergoshear/pi-coder`
-image before syncing this overlay.
+The `vscode-pvc` ReadWriteOnce claim requests 100Gi using the cluster's default
+StorageClass and persists `/home/coder/project`, the default workspace.
+Settings and extensions outside this directory remain ephemeral. The
+deployment uses `Recreate` to avoid concurrent pods sharing the workspace.
+K3s local-path storage is node-local; ensure the selected node has sufficient
+disk space. Its storage request is not a disk quota, and the current
+StorageClass does not support volume expansion.
+
+Argo CD's automated pruning removes the old Pi Coder Deployment and Service
+when this replacement syncs. Copy any needed files out of the old ephemeral
+Pi workspace before syncing. The stock image does not include the Pi CLI or
+its model configuration. This also replaces the old `pi.ergoshear.dev`
+ingress and certificate name; use `code.ergoshear.dev` after sync.
 
 ## Olla
 
@@ -137,7 +149,13 @@ Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers models from llama.cpp at `mlops-node-7.lan:8080`
 and LM Studio at `192.168.1.12:1234`, using `least-connections` balancing
 (the equivalent of least-busy). The `gpt-oss-20b` alias maps to llama.cpp's
-`/models/gpt-oss-20b-MXFP4.gguf` model ID. The `llama3` alias accepts Ollama's
+`/models/gpt-oss-20b-MXFP4.gguf` model ID. A second llama.cpp backend at
+`mlops-node-4.lan:8080` serves `Qwen3-Coder-Next-Q4_K_M.gguf` with the API
+model ID `qwen3-coder-next`. Its currently configured context window is 4096
+tokens; clients should use that runtime limit rather than the training limit.
+Hermes (`OLLA_MODEL`) and n8n (`N8N_INSTANCE_AI_MODEL`) explicitly select
+`/models/gpt-oss-20b-MXFP4.gguf` through the Olla OpenAI-compatible endpoint.
+The `llama3` alias accepts Ollama's
 `llama3:latest` and LM Studio's `llama3`; update it if LM Studio advertises
 a different model ID. The `lm-studio` bearer token is the supplied placeholder,
 not a production secret. Real credentials must be provided through a Kubernetes
@@ -151,23 +169,63 @@ ConfigMap changes trigger a rollout through Kustomize's generated name hash.
 
 ## App image updates
 
-The Hermes, Pi Coder, and n8n overlays all track their respective
+The Hermes and n8n overlays track their respective
 `ghcr.io/ergoshear` images with the `latest` tag and `imagePullPolicy: Always`.
 New pods pull the current image. Publishing a new `latest` image does not
 change the Deployment manifest or automatically restart existing pods;
 restart the relevant Deployment after publishing to roll out the update.
 Third-party app images and Helm-managed infrastructure retain their existing
-version settings.
+version settings. Code-server tracks `codercom/code-server:latest` with
+`imagePullPolicy: Always`; restart `vscode-web` to pick up a newly published
+image.
+
+### Hermes dashboard port
+
+The Hermes overlay disables Kubernetes service-link environment variables and
+explicitly sets `HERMES_DASHBOARD_PORT` to `"9119"`. Otherwise, the
+`hermes-dashboard` Service injects `HERMES_DASHBOARD_PORT=tcp://<cluster-ip>:9119`,
+which the s6 dashboard service passes to `--port`, causing an invalid integer
+error. Service DNS discovery is unaffected. The dashboard Service and probes
+continue to use port 9119, and dashboard authentication remains enabled.
 
 ## Agent DNS/TLS
 
 K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,
-`n8n.ergoshear.dev`, and `pi.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
-Route 53 hosted zone, and cert-manager obtains and renews a Let's Encrypt
-certificate using Route 53 DNS-01 challenges. The public A records resolve to
-Traefik's private MetalLB address, so the applications remain reachable only
-from networks that can route to the cluster LAN. The private IP is visible in
-public DNS.
+`n8n.ergoshear.dev`, `code.ergoshear.dev`, and `olla.ergoshear.dev`.
+`apps/traefik-tailscale/` adds a separate LoadBalancer Service in `kube-system`
+selecting the existing Traefik pods. Its `tailscale` loadBalancerClass makes
+the Tailscale operator provision the `apps-ingress` proxy; the existing MetalLB
+Service remains unchanged for LAN access.
+
+ExternalDNS reads the four hostnames from this Service's hostname annotation
+and publishes its operator-assigned Tailscale IP from LoadBalancer status.
+It updates the existing public Route 53 A records from `192.168.202.104`
+without hardcoding a tailnet IP or requiring an A-to-CNAME migration. The app
+Ingress no longer opts into ExternalDNS, avoiding competing LAN targets.
+The separate Argo CD Ingress remains opted in and continues using its current
+LAN endpoint.
+
+The operator publishes both a MagicDNS hostname and an IP in Service status.
+ExternalDNS is restricted to managing A/AAAA records so it ignores the hostname
+target rather than generating a competing CNAME. TXT registry ownership is
+still managed automatically with the same `ergoshear-k3s` owner ID. The cluster
+currently uses IPv4 Services, so the operator publishes a Tailscale IPv4
+address and ExternalDNS creates A records.
+
+Public CNAMEs to MagicDNS names are deliberately avoided because they can fail
+on Windows and Android clients; see
+[tailscale/tailscale#7650](https://github.com/tailscale/tailscale/issues/7650).
+App DNS resolution now uses ordinary public A records, but clients must still
+connect to this tailnet to reach the IP. Configure ACLs/grants to permit clients to
+reach `tag:k8s` on TCP ports 80 and 443; the operator's own `tag:k8s-operator`
+API proxy is not the app endpoint. The public DNS records reveal the proxy's
+tailnet IP but do not make it reachable from the internet. This is a single
+proxy pod, so its restarts temporarily interrupt tailnet access.
+
+The proxy forwards TCP to Traefik without terminating TLS. cert-manager still
+obtains and renews the existing Let's Encrypt certificate using Route 53
+DNS-01 challenges, and Traefik serves it for the original app hostnames. Use
+the app URLs, not the proxy's MagicDNS hostname, for HTTPS.
 
 Before applying, ensure a public Route 53 hosted zone for `ergoshear.dev` is
 authoritative and create an AWS IAM identity with Route 53 permissions limited
@@ -176,8 +234,9 @@ named `route53-credentials` in both namespaces. Each Secret must contain the
 keys `access-key-id` and `secret-access-key`. Do not commit AWS credentials to
 this repository. The IAM policy in `apps/external-dns/route53-policy.json`
 allows record changes throughout this hosted zone. ExternalDNS itself is
-configured for the public `ergoshear.dev` zone, Ingresses carrying its opt-in
-annotation, and upsert-only changes. cert-manager needs to create and remove
+configured for the public `ergoshear.dev` zone, Services and Ingresses carrying
+its opt-in annotation, A/AAAA records, and upsert-only changes. cert-manager
+needs to create and remove
 TXT challenge records in the same hosted zone.
 
 Install cert-manager first so its CRDs exist before applying the ClusterIssuer
@@ -192,7 +251,37 @@ kubectl rollout status deployment/cert-manager -n cert-manager
 kubectl kustomize apps --enable-helm | kubectl apply -f -
 ```
 
-After sync, check `kubectl get ingress,certificate -n agents` and
-`kubectl get challenges -A`. The Ingress address should match the Traefik
-LoadBalancer address, and the Certificate should become Ready before HTTPS is
-available.
+### Verify the Tailscale DNS cutover
+
+After merging and syncing `apps`, wait for the proxy's IP and check
+ExternalDNS reconciliation:
+
+```sh
+kubectl -n kube-system get service traefik-tailscale -o wide
+kubectl -n external-dns logs deployment/external-dns --tail=50
+dig +short A hermes-agent.ergoshear.dev
+dig +short A n8n.ergoshear.dev
+dig +short A code.ergoshear.dev
+dig +short A olla.ergoshear.dev
+```
+
+Each app A record should match the Service's Tailscale IPv4 address. Until the
+operator publishes an IP, `upsert-only` preserves the old records. Existing
+DNS caches may retain the LAN address until its TTL expires. From a tailnet
+client, verify HTTPS to all four app URLs after propagation; before propagation
+you can test with the original Host/SNI and the proxy's actual tailnet IP:
+
+```sh
+TAILSCALE_IP=$(kubectl -n kube-system get service traefik-tailscale \
+  -o jsonpath='{.status.loadBalancer.ingress[?(@.ip)].ip}')
+curl --resolve "code.ergoshear.dev:443:$TAILSCALE_IP" https://code.ergoshear.dev/
+```
+
+Also check `kubectl get ingress,certificate -n agents` and
+`kubectl get challenges -A`. The Ingress status still shows the original
+Traefik LAN LoadBalancer address; ExternalDNS now reads the proxy Service
+instead. The Certificate must be Ready before HTTPS is available.
+
+To roll back, revert the proxy Service and ExternalDNS source changes and
+restore the app Ingress's ExternalDNS opt-in annotation. The same controller
+owner ID allows it to update the existing A records back to Traefik's LAN IP.
