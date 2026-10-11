@@ -1,0 +1,20 @@
+---
+# NVIDIA device plugin Helm values.
+nfd:
+  enabled: false
+
+nodeSelector:
+  hardware.gpu: nvidia
+
+# K3s registers this runtime when nvidia-container-toolkit is installed.
+runtimeClassName: nvidia
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: hardware.gpu
+              operator: In
+              values:
+                - nvidia

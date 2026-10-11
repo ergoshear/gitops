@@ -15,3 +15,5 @@ resources:
 - n8n-sandbox
 - searxng
 - olla
+- gpu-device-plugins
+- qwen3-coder-next
