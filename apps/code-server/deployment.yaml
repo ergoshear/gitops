@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vscode-web
+  labels:
+    app: vscode-web
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vscode-web
+  template:
+    metadata:
+      labels:
+        app: vscode-web
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: vscode
+        image: codercom/code-server:latest
+        imagePullPolicy: Always
+        args:
+        - --bind-addr
+        - 0.0.0.0:8080
+        - --auth
+        - password
+        - /home/coder/project
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pi-coder-login
+              key: password
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 20
+          failureThreshold: 3
+        volumeMounts:
+        - mountPath: /home/coder/project
+          name: workspace-storage
+      volumes:
+      - name: workspace-storage
+        persistentVolumeClaim:
+          claimName: vscode-pvc
