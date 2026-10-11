@@ -279,9 +279,10 @@ keys `access-key-id` and `secret-access-key`. Do not commit AWS credentials to
 this repository. The IAM policy in `apps/external-dns/route53-policy.json`
 allows record changes throughout this hosted zone. ExternalDNS itself is
 configured for the public `ergoshear.dev` zone, Services and Ingresses carrying
-its opt-in annotation, A/AAAA records, and upsert-only changes. cert-manager
-needs to create and remove
-TXT challenge records in the same hosted zone.
+its opt-in annotation, A/AAAA records, and full `sync` reconciliation. It
+updates changed records and removes stale records it owns when no opted-in
+source requests them. cert-manager needs to create and remove TXT challenge
+records in the same hosted zone.
 
 Install cert-manager first so its CRDs exist before applying the ClusterIssuer
 and Ingress resources:
@@ -310,8 +311,7 @@ dig +short A olla.ergoshear.dev
 ```
 
 Each app A record should match both the Service's `target` annotation and its
-Tailscale IPv4 address. Until the operator publishes an IP, `upsert-only`
-preserves the old records. Existing DNS caches may retain the LAN address
+Tailscale IPv4 address. Existing DNS caches may retain the previous address
 until its TTL expires. From a tailnet
 client, verify HTTPS to all four app URLs after propagation; before propagation
 you can test with the original Host/SNI and the proxy's actual tailnet IP:
@@ -329,4 +329,4 @@ instead. The Certificate must be Ready before HTTPS is available.
 
 To roll back, revert the proxy Service and ExternalDNS source changes and
 restore the app Ingress's ExternalDNS opt-in annotation. The same controller
-owner ID allows it to update the existing A records back to Traefik's LAN IP.
+owner ID allows it to reconcile the A records back to Traefik's LAN IP.
