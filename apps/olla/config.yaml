@@ -10,25 +10,6 @@ discovery:
   type: static
   static:
     endpoints:
-      - name: llamacpp-node-7
-        url: "http://mlops-node-7.lan:8080"
-        type: llamacpp
-        priority: 100
-        model_url: /v1/models
-        health_check_url: /health
-        check_interval: 10s
-        check_timeout: 5s
-      - name: llamacpp-node-4
-        url: "http://mlops-node-4.lan:8080"
-        type: llamacpp
-        priority: 100
-        model_url: /v1/models
-        health_check_url: /health
-        check_interval: 10s
-        check_timeout: 5s
-        auth:
-          type: bearer
-          token: lm-studio
       - name: qwen3-coder-next
         url: "http://qwen3-coder-next:8080"
         type: llamacpp
@@ -62,13 +43,19 @@ model_registry:
   enable_unifier: true
   routing_strategy:
     type: strict
+    options:
+      fallback_behavior: none
 
+# Clients choose a model with the `model` field in their API request. Olla
+# routes only to endpoints that advertise that model, then balances requests
+# among matching endpoints.
 model_aliases:
-  gpt-oss-20b:
-    - /models/gpt-oss-20b-MXFP4.gguf
-  llama3:
-    - llama3:latest
-    - llama3
+  qwen3-coder-next:
+    - /models/Qwen3-Coder-Next-Q4_K_M.gguf
+  qwen3.6-27b:
+    - Qwen3.6-27B
+  devstral-small-2:
+    - Devstral-Small-2
 
 dashboard:
   enabled: true
