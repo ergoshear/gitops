@@ -240,7 +240,7 @@ the Tailscale operator provision the `apps-ingress` proxy; the existing MetalLB
 Service remains unchanged for LAN access.
 
 ExternalDNS reads the four hostnames from this Service's hostname annotation
-and publishes the Tailscale proxy IP from its `external-dns.alpha.kubernetes.io/target`
+and publishes the Tailscale proxy IP from its `external-dns.kubernetes.io/target`
 annotation. ExternalDNS was leaving the old LAN A records in place despite the
 Tailscale IP appearing in LoadBalancer status, so this target is explicit. Keep
 it in sync with the Service's Tailscale IP if that IP changes. This corrects
