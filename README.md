@@ -148,7 +148,8 @@ OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers models from llama.cpp at
 `mlops-node-7.lan:8080` and `mlops-node-4.lan:8080`, and the in-cluster
-`qwen3-coder-next` Service. Olla uses `least-connections` balancing.
+`qwen3-coder-next` and `qwen36-27b` Services. Olla uses `least-connections`
+balancing.
 The `gpt-oss-20b` alias maps to llama.cpp's
 `/models/gpt-oss-20b-MXFP4.gguf` model ID, which Hermes (`OLLA_MODEL`) and n8n
 (`N8N_INSTANCE_AI_MODEL`) select through Olla's OpenAI-compatible endpoint.
@@ -166,6 +167,15 @@ the app if the node should be reserved for this workload. A `NoSchedule` taint
 blocks future ordinary pods but does not evict pods already running there; move
 existing workloads off the node as part of the reservation. The required node
 selector keeps Qwen on `mlops-node-7.lan` even if the taint is removed.
+
+The `apps/qwen36-27b/` app deploys the Qwen3.6-27B Q4_K_M llama.cpp server to
+`mlops-node-6.lan`. Its hostname and NVIDIA GPU labels constrain placement, and
+the pod requests `nvidia.com/gpu: 1` using the `nvidia` runtime class. The
+262144-token context uses Q4_0 K/V cache with 56 model layers on the GPU; a
+64Gi local-path PVC stores the downloaded model. Olla discovers it through the
+`qwen36-27b` ClusterIP Service. Ensure the Qwen3.6 image has been published to
+GHCR and node 6 has the `hardware.gpu=nvidia` label and NVIDIA device plugin
+before syncing the app.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,

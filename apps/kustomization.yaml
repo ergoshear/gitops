@@ -17,3 +17,4 @@ resources:
 - olla
 - gpu-device-plugins
 - qwen3-coder-next
+- qwen36-27b
