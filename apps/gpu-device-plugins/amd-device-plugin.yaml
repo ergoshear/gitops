@@ -12,6 +12,7 @@ spec:
       labels:
         app.kubernetes.io/name: amd-gpu-device-plugin
     spec:
+      priorityClassName: system-node-critical
       nodeSelector:
         hardware.gpu: amd
       tolerations:
