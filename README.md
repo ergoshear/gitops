@@ -163,6 +163,15 @@ restart the relevant Deployment after publishing to roll out the update.
 Third-party app images and Helm-managed infrastructure retain their existing
 version settings.
 
+### Hermes dashboard port
+
+The Hermes overlay disables Kubernetes service-link environment variables and
+explicitly sets `HERMES_DASHBOARD_PORT` to `"9119"`. Otherwise, the
+`hermes-dashboard` Service injects `HERMES_DASHBOARD_PORT=tcp://<cluster-ip>:9119`,
+which the s6 dashboard service passes to `--port`, causing an invalid integer
+error. Service DNS discovery is unaffected. The dashboard Service and probes
+continue to use port 9119, and dashboard authentication remains enabled.
+
 ## Agent DNS/TLS
 
 K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,

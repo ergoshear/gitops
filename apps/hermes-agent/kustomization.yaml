@@ -12,6 +12,9 @@ patches:
     kind: Deployment
     name: fedora-44-deployment
   patch: |-
+    - op: add
+      path: /spec/template/spec/enableServiceLinks
+      value: false
     - op: remove
       path: /spec/template/spec/containers/0/ports
     - op: add
@@ -25,6 +28,8 @@ patches:
       value:
       - name: HERMES_DASHBOARD
         value: "1"
+      - name: HERMES_DASHBOARD_PORT
+        value: "9119"
       - name: OPENAI_BASE_URL
         value: https://olla.ergoshear.dev/olla/openai/v1
       - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
