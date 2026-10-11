@@ -146,20 +146,26 @@ The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
 OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
-`apps/olla/config.yaml` discovers Qwen3-Coder-Next from the in-cluster
-`qwen3-coder-next` Service using `least-connections` balancing. The deployment
-pins inference to `mlops-node-7.lan`, requests its AMD GPU through Kubernetes,
-and downloads the Q4_K_M model into persistent storage on first startup. Its
-configured context is 262144 tokens; actual startup depends on available GPU
-memory for model weights, KV cache, and compute buffers.
+`apps/olla/config.yaml` discovers models from llama.cpp at
+`mlops-node-7.lan:8080` and `mlops-node-4.lan:8080`, and the in-cluster
+`qwen3-coder-next` Service. Olla uses `least-connections` balancing.
+The `gpt-oss-20b` alias maps to llama.cpp's
+`/models/gpt-oss-20b-MXFP4.gguf` model ID, which Hermes (`OLLA_MODEL`) and n8n
+(`N8N_INSTANCE_AI_MODEL`) select through Olla's OpenAI-compatible endpoint.
+The `llama3` alias accepts `llama3:latest` and `llama3`. The `lm-studio`
+bearer token on the node-4 endpoint is a placeholder; provide real credentials
+through a Kubernetes Secret rather than committing them to Git.
 
-The pod tolerates the `dedicated=qwen3-coder-next:NoSchedule` taint. To reserve
-the node for this workload, configure that taint on `mlops-node-7.lan` through
-the node's K3s agent configuration before syncing this app. A `NoSchedule`
-taint blocks future ordinary pods but does not evict pods already running there;
-move existing workloads off the node as part of the reservation. The pod's
-required node selector keeps it on `mlops-node-7.lan` even if the taint is
-removed.
+The Qwen3-Coder-Next deployment pins inference to `mlops-node-7.lan`, requests
+its AMD GPU through Kubernetes, and downloads the Q4_K_M model into persistent
+storage on first startup. Its configured context is 262144 tokens; actual
+startup depends on available GPU memory for model weights, KV cache, and compute
+buffers. The pod tolerates the `dedicated=qwen3-coder-next:NoSchedule` taint.
+Configure that taint through the node's K3s agent configuration before syncing
+the app if the node should be reserved for this workload. A `NoSchedule` taint
+blocks future ordinary pods but does not evict pods already running there; move
+existing workloads off the node as part of the reservation. The required node
+selector keeps Qwen on `mlops-node-7.lan` even if the taint is removed.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,

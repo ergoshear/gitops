@@ -10,17 +10,36 @@ discovery:
   type: static
   static:
     endpoints:
-    - name: qwen3-coder-next
-      url: "http://qwen3-coder-next:8080"
-      type: llamacpp
-      priority: 100
-      model_url: /v1/models
-      health_check_url: /health
-      check_interval: 10s
-      check_timeout: 5s
-  model_discovery:
-    enabled: true
-    interval: 5m
+      - name: llamacpp-node-7
+        url: "http://mlops-node-7.lan:8080"
+        type: llamacpp
+        priority: 100
+        model_url: /v1/models
+        health_check_url: /health
+        check_interval: 10s
+        check_timeout: 5s
+      - name: llamacpp-node-4
+        url: "http://mlops-node-4.lan:8080"
+        type: llamacpp
+        priority: 100
+        model_url: /v1/models
+        health_check_url: /health
+        check_interval: 10s
+        check_timeout: 5s
+        auth:
+          type: bearer
+          token: lm-studio
+      - name: qwen3-coder-next
+        url: "http://qwen3-coder-next:8080"
+        type: llamacpp
+        priority: 100
+        model_url: /v1/models
+        health_check_url: /health
+        check_interval: 10s
+        check_timeout: 5s
+    model_discovery:
+      enabled: true
+      interval: 5m
 
 model_registry:
   type: memory
@@ -28,14 +47,21 @@ model_registry:
   routing_strategy:
     type: strict
 
+model_aliases:
+  gpt-oss-20b:
+    - /models/gpt-oss-20b-MXFP4.gguf
+  llama3:
+    - llama3:latest
+    - llama3
+
 dashboard:
   enabled: true
   access_policy:
     allowed_cidrs:
-    - "127.0.0.0/8"
-    - "10.0.0.0/8"
-    - "172.16.0.0/12"
-    - "192.168.0.0/16"
+      - "127.0.0.0/8"
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
     allowed_hosts:
-    - localhost
-    - olla.ergoshear.dev
+      - localhost
+      - olla.ergoshear.dev
