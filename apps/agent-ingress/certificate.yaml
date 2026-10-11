@@ -10,4 +10,5 @@ spec:
   dnsNames:
   - hermes-agent.ergoshear.dev
   - n8n.ergoshear.dev
-  - pi.ergoshear.dev
+  - code.ergoshear.dev
+  - olla.ergoshear.dev

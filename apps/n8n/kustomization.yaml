@@ -21,6 +21,14 @@ patches:
     - op: add
       path: /spec/template/spec/containers/0/env
       value:
+      - name: N8N_INSTANCE_AI_MODEL_URL
+        value: https://olla.ergoshear.dev/olla/openai/v1
+      - name: N8N_INSTANCE_AI_MODEL_API_KEY
+        value: olla
+      - name: N8N_INSTANCE_AI_MODEL
+        value: llama3
+      - name: N8N_INSTANCE_AI_THINKING_ENABLED
+        value: "false"
       - name: N8N_INSTANCE_AI_SANDBOX_ENABLED
         value: "true"
       - name: N8N_INSTANCE_AI_SANDBOX_PROVIDER

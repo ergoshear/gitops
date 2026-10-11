@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: olla
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: olla
+  template:
+    metadata:
+      labels:
+        app: olla
+    spec:
+      containers:
+      - name: olla
+        image: ghcr.io/thushan/olla:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 40114
+        volumeMounts:
+        - name: config
+          mountPath: /app/config/config.local.yaml
+          subPath: config.local.yaml
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /internal/health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /internal/health
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 3
+      volumes:
+      - name: config
+        configMap:
+          name: olla-config
