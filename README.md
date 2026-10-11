@@ -233,22 +233,21 @@ continue to use port 9119, and dashboard authentication remains enabled.
 ## Agent DNS/TLS
 
 K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,
-`n8n.ergoshear.dev`, `code.ergoshear.dev`, and `olla.ergoshear.dev`.
+`n8n.ergoshear.dev`, `code.ergoshear.dev`, `olla.ergoshear.dev`, and
+`argocd.ergoshear.dev`.
 `apps/traefik-tailscale/` adds a separate LoadBalancer Service in `kube-system`
 selecting the existing Traefik pods. Its `tailscale` loadBalancerClass makes
 the Tailscale operator provision the `apps-ingress` proxy; the existing MetalLB
 Service remains unchanged for LAN access.
 
-ExternalDNS reads the four hostnames from this Service's hostname annotation
+ExternalDNS reads the five hostnames from this Service's hostname annotation
 and publishes the Tailscale proxy IP from its `external-dns.kubernetes.io/target`
 annotation. ExternalDNS was leaving the old LAN A records in place despite the
 Tailscale IP appearing in LoadBalancer status, so this target is explicit. Keep
 it in sync with the Service's Tailscale IP if that IP changes. This corrects
 the public Route 53 A records from `192.168.202.104` without an A-to-CNAME
-migration. The app Ingress no longer opts into ExternalDNS, avoiding competing
-LAN targets.
-The separate Argo CD Ingress remains opted in and continues using its current
-LAN endpoint.
+migration. The Ingresses do not opt into ExternalDNS; this Service is the
+single DNS source for all five hostnames, avoiding competing LAN targets.
 
 The operator publishes both a MagicDNS hostname and an IP in Service status.
 ExternalDNS is restricted to managing A/AAAA records; the explicit target
@@ -308,12 +307,13 @@ dig +short A hermes-agent.ergoshear.dev
 dig +short A n8n.ergoshear.dev
 dig +short A code.ergoshear.dev
 dig +short A olla.ergoshear.dev
+dig +short A argocd.ergoshear.dev
 ```
 
-Each app A record should match both the Service's `target` annotation and its
+Each A record should match both the Service's `target` annotation and its
 Tailscale IPv4 address. Existing DNS caches may retain the previous address
 until its TTL expires. From a tailnet
-client, verify HTTPS to all four app URLs after propagation; before propagation
+client, verify HTTPS to all five app URLs after propagation; before propagation
 you can test with the original Host/SNI and the proxy's actual tailnet IP:
 
 ```sh
