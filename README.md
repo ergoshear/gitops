@@ -240,19 +240,21 @@ the Tailscale operator provision the `apps-ingress` proxy; the existing MetalLB
 Service remains unchanged for LAN access.
 
 ExternalDNS reads the four hostnames from this Service's hostname annotation
-and publishes its operator-assigned Tailscale IP from LoadBalancer status.
-It updates the existing public Route 53 A records from `192.168.202.104`
-without hardcoding a tailnet IP or requiring an A-to-CNAME migration. The app
-Ingress no longer opts into ExternalDNS, avoiding competing LAN targets.
+and publishes the Tailscale proxy IP from its `external-dns.alpha.kubernetes.io/target`
+annotation. ExternalDNS was leaving the old LAN A records in place despite the
+Tailscale IP appearing in LoadBalancer status, so this target is explicit. Keep
+it in sync with the Service's Tailscale IP if that IP changes. This corrects
+the public Route 53 A records from `192.168.202.104` without an A-to-CNAME
+migration. The app Ingress no longer opts into ExternalDNS, avoiding competing
+LAN targets.
 The separate Argo CD Ingress remains opted in and continues using its current
 LAN endpoint.
 
 The operator publishes both a MagicDNS hostname and an IP in Service status.
-ExternalDNS is restricted to managing A/AAAA records so it ignores the hostname
-target rather than generating a competing CNAME. TXT registry ownership is
-still managed automatically with the same `ergoshear-k3s` owner ID. The cluster
-currently uses IPv4 Services, so the operator publishes a Tailscale IPv4
-address and ExternalDNS creates A records.
+ExternalDNS is restricted to managing A/AAAA records; the explicit target
+annotation ensures it publishes the Tailscale IPv4 address rather than the
+MagicDNS hostname or the Traefik LAN address. TXT registry ownership is still
+managed automatically with the same `ergoshear-k3s` owner ID.
 
 Public CNAMEs to MagicDNS names are deliberately avoided because they can fail
 on Windows and Android clients; see
@@ -307,9 +309,10 @@ dig +short A code.ergoshear.dev
 dig +short A olla.ergoshear.dev
 ```
 
-Each app A record should match the Service's Tailscale IPv4 address. Until the
-operator publishes an IP, `upsert-only` preserves the old records. Existing
-DNS caches may retain the LAN address until its TTL expires. From a tailnet
+Each app A record should match both the Service's `target` annotation and its
+Tailscale IPv4 address. Until the operator publishes an IP, `upsert-only`
+preserves the old records. Existing DNS caches may retain the LAN address
+until its TTL expires. From a tailnet
 client, verify HTTPS to all four app URLs after propagation; before propagation
 you can test with the original Host/SNI and the proxy's actual tailnet IP:
 
