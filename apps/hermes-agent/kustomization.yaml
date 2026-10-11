@@ -35,7 +35,7 @@ patches:
       - name: OPENAI_BASE_URL
         value: https://olla.ergoshear.dev/olla/openai/v1
       - name: OLLA_MODEL
-        value: /models/gpt-oss-20b-MXFP4.gguf
+        value: qwen3-coder-next
       - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
         valueFrom:
           secretKeyRef:
