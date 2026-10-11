@@ -159,7 +159,7 @@ through a Kubernetes Secret rather than committing them to Git.
 
 The Qwen3-Coder-Next deployment pins inference to `mlops-node-7.lan`, requests
 its AMD GPU through Kubernetes, and downloads the Q4_K_M model into persistent
-storage on first startup. Its configured context is 262144 tokens; actual
+storage on first startup. Its configured context is 65536 tokens; actual
 startup depends on available GPU memory for model weights, KV cache, and compute
 buffers. The pod tolerates the `dedicated=qwen3-coder-next:NoSchedule` taint.
 Configure that taint through the node's K3s agent configuration before syncing
@@ -171,7 +171,7 @@ selector keeps Qwen on `mlops-node-7.lan` even if the taint is removed.
 The `apps/qwen36-27b/` app deploys the Qwen3.6-27B Q4_K_M llama.cpp server to
 `mlops-node-6.lan`. Its hostname and NVIDIA GPU labels constrain placement, and
 the pod requests `nvidia.com/gpu: 1` using the `nvidia` runtime class. The
-262144-token context uses Q4_0 K/V cache with 56 model layers on the GPU; a
+65536-token context uses Q4_0 K/V cache with 56 model layers on the GPU; a
 64Gi local-path PVC stores the downloaded model. Olla discovers it through the
 `qwen36-27b` ClusterIP Service. Ensure the Qwen3.6 image has been published to
 GHCR and node 6 has the `hardware.gpu=nvidia` label and NVIDIA device plugin
@@ -181,7 +181,7 @@ The `apps/devstral-small-2/` app deploys the Devstral Small 2 Q4_K_M llama.cpp
 server to `mlops-node-4.lan`. Its node selector requires both that hostname and
 the `hardware.gpu=amd` label, and it requests one `amd.com/gpu`. A 32Gi
 local-path PVC holds the model and vision projector. The deployment requests a
-256K context with Q4_0 K/V cache and full GPU offload; if allocation fails,
+65536-token context with Q4_0 K/V cache and full GPU offload; if allocation fails,
 lower its batch sizes or set `KV_OFFLOAD=off` to keep the full KV cache in
 system RAM. Olla discovers it through the `devstral-small-2` ClusterIP Service.
 Publish `ghcr.io/ergoshear/devstral-small-2:latest` and ensure node 4 has the
