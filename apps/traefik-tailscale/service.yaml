@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-tailscale
+  annotations:
+    tailscale.com/hostname: apps-ingress
+    external-dns.alpha.kubernetes.io/enabled: "true"
+    external-dns.alpha.kubernetes.io/hostname: >-
+      hermes-agent.ergoshear.dev,n8n.ergoshear.dev,code.ergoshear.dev,olla.ergoshear.dev
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+  allocateLoadBalancerNodePorts: false
+  selector:
+    app.kubernetes.io/instance: traefik-kube-system
+    app.kubernetes.io/name: traefik
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: web
+  - name: websecure
+    port: 443
+    protocol: TCP
+    targetPort: websecure

@@ -7,6 +7,7 @@ resources:
 - cert-manager-issuer
 - external-dns
 - tailscale-operator
+- traefik-tailscale
 - agent-ingress
 - hermes-agent
 - code-server

@@ -189,12 +189,41 @@ continue to use port 9119, and dashboard authentication remains enabled.
 ## Agent DNS/TLS
 
 K3s Traefik is the shared HTTPS entry point for `hermes-agent.ergoshear.dev`,
-`n8n.ergoshear.dev`, and `code.ergoshear.dev`. ExternalDNS manages these Ingress hostnames in the public
-Route 53 hosted zone, and cert-manager obtains and renews a Let's Encrypt
-certificate using Route 53 DNS-01 challenges. The public A records resolve to
-Traefik's private MetalLB address, so the applications remain reachable only
-from networks that can route to the cluster LAN. The private IP is visible in
-public DNS.
+`n8n.ergoshear.dev`, `code.ergoshear.dev`, and `olla.ergoshear.dev`.
+`apps/traefik-tailscale/` adds a separate LoadBalancer Service in `kube-system`
+selecting the existing Traefik pods. Its `tailscale` loadBalancerClass makes
+the Tailscale operator provision the `apps-ingress` proxy; the existing MetalLB
+Service remains unchanged for LAN access.
+
+ExternalDNS reads the four hostnames from this Service's hostname annotation
+and publishes its operator-assigned Tailscale IP from LoadBalancer status.
+It updates the existing public Route 53 A records from `192.168.202.104`
+without hardcoding a tailnet IP or requiring an A-to-CNAME migration. The app
+Ingress no longer opts into ExternalDNS, avoiding competing LAN targets.
+The separate Argo CD Ingress remains opted in and continues using its current
+LAN endpoint.
+
+The operator publishes both a MagicDNS hostname and an IP in Service status.
+ExternalDNS is restricted to managing A/AAAA records so it ignores the hostname
+target rather than generating a competing CNAME. TXT registry ownership is
+still managed automatically with the same `ergoshear-k3s` owner ID. The cluster
+currently uses IPv4 Services, so the operator publishes a Tailscale IPv4
+address and ExternalDNS creates A records.
+
+Public CNAMEs to MagicDNS names are deliberately avoided because they can fail
+on Windows and Android clients; see
+[tailscale/tailscale#7650](https://github.com/tailscale/tailscale/issues/7650).
+App DNS resolution now uses ordinary public A records, but clients must still
+connect to this tailnet to reach the IP. Configure ACLs/grants to permit clients to
+reach `tag:k8s` on TCP ports 80 and 443; the operator's own `tag:k8s-operator`
+API proxy is not the app endpoint. The public DNS records reveal the proxy's
+tailnet IP but do not make it reachable from the internet. This is a single
+proxy pod, so its restarts temporarily interrupt tailnet access.
+
+The proxy forwards TCP to Traefik without terminating TLS. cert-manager still
+obtains and renews the existing Let's Encrypt certificate using Route 53
+DNS-01 challenges, and Traefik serves it for the original app hostnames. Use
+the app URLs, not the proxy's MagicDNS hostname, for HTTPS.
 
 Before applying, ensure a public Route 53 hosted zone for `ergoshear.dev` is
 authoritative and create an AWS IAM identity with Route 53 permissions limited
@@ -203,8 +232,9 @@ named `route53-credentials` in both namespaces. Each Secret must contain the
 keys `access-key-id` and `secret-access-key`. Do not commit AWS credentials to
 this repository. The IAM policy in `apps/external-dns/route53-policy.json`
 allows record changes throughout this hosted zone. ExternalDNS itself is
-configured for the public `ergoshear.dev` zone, Ingresses carrying its opt-in
-annotation, and upsert-only changes. cert-manager needs to create and remove
+configured for the public `ergoshear.dev` zone, Services and Ingresses carrying
+its opt-in annotation, A/AAAA records, and upsert-only changes. cert-manager
+needs to create and remove
 TXT challenge records in the same hosted zone.
 
 Install cert-manager first so its CRDs exist before applying the ClusterIssuer
@@ -219,7 +249,37 @@ kubectl rollout status deployment/cert-manager -n cert-manager
 kubectl kustomize apps --enable-helm | kubectl apply -f -
 ```
 
-After sync, check `kubectl get ingress,certificate -n agents` and
-`kubectl get challenges -A`. The Ingress address should match the Traefik
-LoadBalancer address, and the Certificate should become Ready before HTTPS is
-available.
+### Verify the Tailscale DNS cutover
+
+After merging and syncing `apps`, wait for the proxy's IP and check
+ExternalDNS reconciliation:
+
+```sh
+kubectl -n kube-system get service traefik-tailscale -o wide
+kubectl -n external-dns logs deployment/external-dns --tail=50
+dig +short A hermes-agent.ergoshear.dev
+dig +short A n8n.ergoshear.dev
+dig +short A code.ergoshear.dev
+dig +short A olla.ergoshear.dev
+```
+
+Each app A record should match the Service's Tailscale IPv4 address. Until the
+operator publishes an IP, `upsert-only` preserves the old records. Existing
+DNS caches may retain the LAN address until its TTL expires. From a tailnet
+client, verify HTTPS to all four app URLs after propagation; before propagation
+you can test with the original Host/SNI and the proxy's actual tailnet IP:
+
+```sh
+TAILSCALE_IP=$(kubectl -n kube-system get service traefik-tailscale \
+  -o jsonpath='{.status.loadBalancer.ingress[?(@.ip)].ip}')
+curl --resolve "code.ergoshear.dev:443:$TAILSCALE_IP" https://code.ergoshear.dev/
+```
+
+Also check `kubectl get ingress,certificate -n agents` and
+`kubectl get challenges -A`. The Ingress status still shows the original
+Traefik LAN LoadBalancer address; ExternalDNS now reads the proxy Service
+instead. The Certificate must be Ready before HTTPS is available.
+
+To roll back, revert the proxy Service and ExternalDNS source changes and
+restore the app Ingress's ExternalDNS opt-in annotation. The same controller
+owner ID allows it to update the existing A records back to Traefik's LAN IP.
