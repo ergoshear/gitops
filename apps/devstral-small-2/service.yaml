@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devstral-small-2
+spec:
+  type: ClusterIP
+  selector:
+    app: devstral-small-2
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http

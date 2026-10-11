@@ -148,8 +148,8 @@ OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers models from llama.cpp at
 `mlops-node-7.lan:8080` and `mlops-node-4.lan:8080`, and the in-cluster
-`qwen3-coder-next` and `qwen36-27b` Services. Olla uses `least-connections`
-balancing.
+`qwen3-coder-next`, `devstral-small-2`, and `qwen36-27b` Services. Olla uses
+`least-connections` balancing.
 The `gpt-oss-20b` alias maps to llama.cpp's
 `/models/gpt-oss-20b-MXFP4.gguf` model ID, which Hermes (`OLLA_MODEL`) and n8n
 (`N8N_INSTANCE_AI_MODEL`) select through Olla's OpenAI-compatible endpoint.
@@ -176,6 +176,16 @@ the pod requests `nvidia.com/gpu: 1` using the `nvidia` runtime class. The
 `qwen36-27b` ClusterIP Service. Ensure the Qwen3.6 image has been published to
 GHCR and node 6 has the `hardware.gpu=nvidia` label and NVIDIA device plugin
 before syncing the app.
+
+The `apps/devstral-small-2/` app deploys the Devstral Small 2 Q4_K_M llama.cpp
+server to `mlops-node-4.lan`. Its node selector requires both that hostname and
+the `hardware.gpu=amd` label, and it requests one `amd.com/gpu`. A 32Gi
+local-path PVC holds the model and vision projector. The deployment requests a
+256K context with Q4_0 K/V cache and full GPU offload; if allocation fails,
+lower its batch sizes or set `KV_OFFLOAD=off` to keep the full KV cache in
+system RAM. Olla discovers it through the `devstral-small-2` ClusterIP Service.
+Publish `ghcr.io/ergoshear/devstral-small-2:latest` and ensure node 4 has the
+AMD GPU label and device plugin before syncing the app.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,
