@@ -14,7 +14,7 @@ domainFilters:
 
 annotationFilter: external-dns.alpha.kubernetes.io/enabled=true
 
-policy: upsert-only
+policy: sync
 registry: txt
 txtOwnerId: ergoshear-k3s
 replicaCount: 1
