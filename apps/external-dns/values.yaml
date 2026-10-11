@@ -3,6 +3,11 @@ provider:
 
 sources:
 - ingress
+- service
+
+managedRecordTypes:
+- A
+- AAAA
 
 domainFilters:
 - ergoshear.dev
