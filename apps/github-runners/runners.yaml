@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: github-runners
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.15.0
+    helm:
+      values: |
+        githubConfigUrl: https://github.com/ergoshear
+        githubConfigSecret: github-runner-auth
+        runnerScaleSetName: ergoshear
+        minRunners: 3
+        maxRunners: 3
+        containerMode:
+          type: dind
+        template:
+          spec:
+            nodeSelector:
+              kubernetes.io/hostname: mlops-node-1.lan
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: github-runners
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
