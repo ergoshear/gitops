@@ -16,6 +16,7 @@ spec:
         githubConfigUrl: https://github.com/ergoshear
         githubConfigSecret: github-runner-auth
         runnerScaleSetName: ergoshear
+        runnerGroup: ergoshear-cluster
         controllerServiceAccount:
           namespace: github-runners
           name: github-runner-controller-gha-rs-controller
