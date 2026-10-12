@@ -9,6 +9,7 @@ spec:
     - hermes-agent.ergoshear.dev
     - n8n.ergoshear.dev
     - code.ergoshear.dev
+    - crew.ergoshear.dev
     - olla.ergoshear.dev
     secretName: ergoshear-dev-tls
   rules:
@@ -42,6 +43,16 @@ spec:
             name: vscode-service
             port:
               number: 80
+  - host: crew.ergoshear.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: crewai
+            port:
+              number: 8000
   - host: olla.ergoshear.dev
     http:
       paths:

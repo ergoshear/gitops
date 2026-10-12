@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crewai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crewai
+  template:
+    metadata:
+      labels:
+        app: crewai
+    spec:
+      containers:
+      - name: crewai
+        image: ghcr.io/ergoshear/crewai:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8000
+        env:
+        - name: CREWAI_LLM_PROVIDER
+          value: olla
+        - name: CREWAI_LLM_BASE_URL
+          value: http://olla:40114/olla/openai/v1
+        - name: CREWAI_LLM_MODEL
+          value: qwen2.5-coder-32b-instruct
+        - name: CREWAI_LLM_API_KEY
+          value: olla
+        - name: CREWAI_MAX_WORKERS
+          value: "4"
+        - name: CREWAI_TIMEOUT
+          value: "300"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 3
