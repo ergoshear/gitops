@@ -84,4 +84,4 @@ spec:
       volumes:
       - name: models
         persistentVolumeClaim:
-          claimName: llama-33-70b-instruct-model
+          claimName: llama-33-70b-instruct-model-node4
