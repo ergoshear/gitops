@@ -11,6 +11,14 @@ patches:
     kind: Deployment
     name: fedora-44-deployment
   patch: |-
+    - op: add
+      path: /spec/template/spec/nodeSelector
+      value:
+        kubernetes.io/hostname: mlops-node-1.lan
+- target:
+    kind: Deployment
+    name: fedora-44-deployment
+  patch: |-
     - op: replace
       path: /spec/template/spec/containers/0/ports/0/containerPort
       value: 5678
