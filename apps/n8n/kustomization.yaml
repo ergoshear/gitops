@@ -26,7 +26,7 @@ patches:
       - name: N8N_INSTANCE_AI_MODEL_API_KEY
         value: olla
       - name: N8N_INSTANCE_AI_MODEL
-        value: /models/gpt-oss-20b-MXFP4.gguf
+        value: qwen2.5-coder-32b-instruct
       - name: N8N_INSTANCE_AI_THINKING_ENABLED
         value: "false"
       - name: N8N_INSTANCE_AI_SANDBOX_ENABLED

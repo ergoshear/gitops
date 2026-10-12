@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qwen25-coder-7b-instruct
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: qwen25-coder-7b-instruct
+  template:
+    metadata:
+      labels:
+        app: qwen25-coder-7b-instruct
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-2.lan
+        hardware.gpu: nvidia
+      runtimeClassName: nvidia
+      initContainers:
+      - name: download-model
+        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct:latest
+        imagePullPolicy: Always
+        command:
+        - /usr/local/bin/download-model
+        volumeMounts:
+        - name: models
+          mountPath: /models
+      containers:
+      - name: model-server
+        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct:latest
+        imagePullPolicy: Always
+        env:
+        - name: MAX_MODEL_LEN
+          value: "8192"
+        - name: GPU_MEMORY_UTILIZATION
+          value: "0.95"
+        ports:
+        - name: http
+          containerPort: 8000
+        resources:
+          requests:
+            cpu: "4"
+            memory: 8Gi
+          limits:
+            cpu: "16"
+            memory: 32Gi
+            nvidia.com/gpu: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: models
+          mountPath: /models
+          readOnly: true
+        - name: shm
+          mountPath: /dev/shm
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          failureThreshold: 360
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 5
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: qwen25-coder-7b-instruct-model
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi

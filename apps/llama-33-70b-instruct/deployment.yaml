@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-33-70b-instruct
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: llama-33-70b-instruct
+  template:
+    metadata:
+      labels:
+        app: llama-33-70b-instruct
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-7.lan
+        hardware.gpu: amd
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: qwen3-coder-next
+        effect: NoSchedule
+      initContainers:
+      - name: download-model
+        image: ghcr.io/ergoshear/llama-33-70b-instruct:latest
+        imagePullPolicy: Always
+        command:
+        - /usr/local/bin/download-model
+        volumeMounts:
+        - name: models
+          mountPath: /models
+      containers:
+      - name: model-server
+        image: ghcr.io/ergoshear/llama-33-70b-instruct:latest
+        imagePullPolicy: Always
+        env:
+        - name: CTX_SIZE
+          value: "32768"
+        - name: GPU_LAYERS
+          value: "99"
+        - name: CACHE_TYPE_K
+          value: "q8_0"
+        - name: CACHE_TYPE_V
+          value: "q8_0"
+        ports:
+        - name: http
+          containerPort: 8080
+        resources:
+          requests:
+            cpu: "8"
+            memory: 16Gi
+          limits:
+            cpu: "24"
+            memory: 60Gi
+            amd.com/gpu: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: Unconfined
+        volumeMounts:
+        - name: models
+          mountPath: /models
+          readOnly: true
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          failureThreshold: 360
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 5
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: llama-33-70b-instruct-model

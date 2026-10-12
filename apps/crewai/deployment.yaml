@@ -25,7 +25,7 @@ spec:
         - name: CREWAI_LLM_BASE_URL
           value: http://olla:40114/olla/openai/v1
         - name: CREWAI_LLM_MODEL
-          value: qwen3-coder-next
+          value: qwen2.5-coder-32b-instruct
         - name: CREWAI_LLM_API_KEY
           value: olla
         - name: CREWAI_MAX_WORKERS

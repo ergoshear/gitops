@@ -10,24 +10,40 @@ discovery:
   type: static
   static:
     endpoints:
-      - name: qwen3-coder-next
-        url: "http://qwen3-coder-next:8080"
+      - name: qwen25-coder-32b-instruct
+        url: "http://qwen25-coder-32b-instruct:8000"
+        type: vllm
+        priority: 100
+        model_url: /v1/models
+        health_check_url: /health
+        check_interval: 10s
+        check_timeout: 5s
+      - name: deepseek-coder-v2-lite
+        url: "http://deepseek-coder-v2-lite:8080"
         type: llamacpp
         priority: 100
         model_url: /v1/models
         health_check_url: /health
         check_interval: 10s
         check_timeout: 5s
-      - name: devstral-small-2
-        url: "http://devstral-small-2:8080"
+      - name: llama-33-70b-instruct
+        url: "http://llama-33-70b-instruct:8080"
         type: llamacpp
         priority: 100
         model_url: /v1/models
         health_check_url: /health
         check_interval: 10s
         check_timeout: 5s
-      - name: qwen36-27b
-        url: "http://qwen36-27b:8080"
+      - name: qwen25-coder-7b-instruct
+        url: "http://qwen25-coder-7b-instruct:8000"
+        type: vllm
+        priority: 100
+        model_url: /v1/models
+        health_check_url: /health
+        check_interval: 10s
+        check_timeout: 5s
+      - name: nomic-embed-text
+        url: "http://nomic-embed-text:8080"
         type: llamacpp
         priority: 100
         model_url: /v1/models
@@ -46,16 +62,8 @@ model_registry:
     options:
       fallback_behavior: none
 
-# Clients choose a model with the `model` field in their API request. Olla
-# routes only to endpoints that advertise that model, then balances requests
-# among matching endpoints.
-model_aliases:
-  qwen3-coder-next:
-    - /models/Qwen3-Coder-Next-Q4_K_M.gguf
-  qwen3.6-27b:
-    - Qwen3.6-27B
-  devstral-small-2:
-    - Devstral-Small-2
+# Clients choose the advertised model ID in their API request. vLLM's
+# --served-model-name and llama.cpp's --alias supply those IDs.
 
 dashboard:
   enabled: true

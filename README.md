@@ -146,51 +146,41 @@ The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
 OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
-`apps/olla/config.yaml` discovers models from llama.cpp at
-`mlops-node-7.lan:8080` and `mlops-node-4.lan:8080`, and the in-cluster
-`qwen3-coder-next`, `devstral-small-2`, and `qwen36-27b` Services. Olla uses
+`apps/olla/config.yaml` discovers the five in-cluster model Services listed
+below. The Qwen services use vLLM on port 8000; the other three use llama.cpp
+on port 8080. Clients choose the model IDs advertised by `/v1/models`; Hermes,
+n8n, and CrewAI request `qwen2.5-coder-32b-instruct`. Olla uses
 `least-connections` balancing.
-The `gpt-oss-20b` alias maps to llama.cpp's
-`/models/gpt-oss-20b-MXFP4.gguf` model ID, which Hermes (`OLLA_MODEL`) and n8n
-(`N8N_INSTANCE_AI_MODEL`) select through Olla's OpenAI-compatible endpoint.
-The `llama3` alias accepts `llama3:latest` and `llama3`. The `lm-studio`
-bearer token on the node-4 endpoint is a placeholder; provide real credentials
-through a Kubernetes Secret rather than committing them to Git.
-
-The Qwen3-Coder-Next deployment pins inference to `mlops-node-7.lan`, requests
-its AMD GPU through Kubernetes, and downloads the Q4_K_M model into persistent
-storage on first startup. Its configured context is 65536 tokens; actual
-startup depends on available GPU memory for model weights, KV cache, and compute
-buffers. The pod tolerates the `dedicated=qwen3-coder-next:NoSchedule` taint.
-Configure that taint through the node's K3s agent configuration before syncing
-the app if the node should be reserved for this workload. A `NoSchedule` taint
-blocks future ordinary pods but does not evict pods already running there; move
-existing workloads off the node as part of the reservation. The required node
-selector keeps Qwen on `mlops-node-7.lan` even if the taint is removed.
-
-The `apps/qwen36-27b/` app deploys the Qwen3.6-27B Q4_K_M llama.cpp server to
-`mlops-node-6.lan`. Its hostname and NVIDIA GPU labels constrain placement, and
-the pod requests `nvidia.com/gpu: 1` using the `nvidia` runtime class. The
-65536-token context uses Q4_0 K/V cache with 56 model layers on the GPU; a
-64Gi local-path PVC stores the downloaded model. Olla discovers it through the
-`qwen36-27b` ClusterIP Service. Ensure the Qwen3.6 image has been published to
-GHCR and node 6 has the `hardware.gpu=nvidia` label and NVIDIA device plugin
-before syncing the app.
-
-The `apps/devstral-small-2/` app deploys the Devstral Small 2 Q4_K_M llama.cpp
-server to `mlops-node-4.lan`. Its node selector requires both that hostname and
-the `hardware.gpu=amd` label, and it requests one `amd.com/gpu`. A 32Gi
-local-path PVC holds the model and vision projector. The deployment requests a
-65536-token context with Q4_0 K/V cache and full GPU offload; if allocation fails,
-lower its batch sizes or set `KV_OFFLOAD=off` to keep the full KV cache in
-system RAM. Olla discovers it through the `devstral-small-2` ClusterIP Service.
-Publish `ghcr.io/ergoshear/devstral-small-2:latest` and ensure node 4 has the
-AMD GPU label and device plugin before syncing the app.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,
 not the original client. Keep this ingress private like the other agent apps,
 or add authentication at the ingress before making it publicly reachable.
+
+## Model deployments
+
+The following apps are included in `apps/kustomization.yaml` and Olla
+discovery:
+
+| App | Target node | Server | GPU allocation |
+| --- | --- | --- | --- |
+| `qwen25-coder-7b-instruct` | `mlops-node-2.lan` | vLLM, port 8000 | RTX 3080 Ti |
+| `nomic-embed-text` | `mlops-node-3.lan` | llama.cpp, port 8080 | gfx1102 |
+| `deepseek-coder-v2-lite` | `mlops-node-4.lan` | llama.cpp, port 8080 | gfx1102 |
+| `qwen25-coder-32b-instruct` | `mlops-node-6.lan` | vLLM, port 8000 | RTX 4090 |
+| `llama-33-70b-instruct` | `mlops-node-7.lan` | llama.cpp, port 8080 | gfx1151 |
+
+Each app uses a node-bound local-path PVC, an init container to download and
+pin the model, a single GPU request, and health probes. The node-7 pod
+tolerates the existing `dedicated=qwen3-coder-next:NoSchedule` taint. Publish
+each image to GHCR and verify GPU labels and device plugins before syncing.
+The 128K DeepSeek context, 32K Llama context with Q8 K/V cache, and both vLLM
+allocations require validation on the target hardware.
+
+The prior Qwen3-Coder-Next, Qwen3.6-27B, and Devstral Small 2 deployments and
+Services are excluded from the root app list. Their PVCs remain managed by
+`apps/retired-model-volumes/` so Argo CD pruning does not delete the model
+files. Remove those claims separately only when the data is no longer needed.
 
 ## GPU device plugins
 
@@ -203,10 +193,9 @@ to 1.31.0.10 and gets host KFD/DRI access for device discovery. Neither plugin
 installs or updates host kernel drivers; those remain managed by the node OS and
 Salt.
 
-Qwen3-Coder-Next requests one `amd.com/gpu`, so it waits for the AMD plugin to
-register the Strix Halo GPU before scheduling. Its container receives the
-device through Kubernetes instead of privileged mode and direct host device
-mounts. The AMD plugin DaemonSet also tolerates the Qwen node's dedicated taint.
+The AMD model containers receive devices through Kubernetes instead of
+privileged mode and direct host device mounts. The AMD plugin DaemonSet also
+tolerates node 7's existing dedicated taint.
 ConfigMap changes trigger a rollout through Kustomize's generated name hash.
 
 ## App image updates

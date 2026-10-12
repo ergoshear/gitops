@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen25-coder-32b-instruct
+spec:
+  type: ClusterIP
+  selector:
+    app: qwen25-coder-32b-instruct
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
