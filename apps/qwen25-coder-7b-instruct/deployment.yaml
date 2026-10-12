@@ -25,7 +25,7 @@ spec:
       runtimeClassName: nvidia
       initContainers:
       - name: download-model
-        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct:latest
+        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct@sha256:6a4e6cd25cfa3af955a46a6eb060a81abf28dd1ca92df37742454f4b02a969ad
         imagePullPolicy: Always
         command:
         - /usr/local/bin/download-model
@@ -34,7 +34,7 @@ spec:
           mountPath: /models
       containers:
       - name: model-server
-        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct:latest
+        image: ghcr.io/ergoshear/qwen25-coder-7b-instruct@sha256:6a4e6cd25cfa3af955a46a6eb060a81abf28dd1ca92df37742454f4b02a969ad
         imagePullPolicy: Always
         env:
         - name: MAX_MODEL_LEN
