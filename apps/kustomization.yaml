@@ -19,7 +19,7 @@ resources:
 - gpu-device-plugins
 - qwen3-coder-next
 - qwen36-27b
-- llama-33-70b-instruct
+- qwen38-27b
 - qwen25-coder-7b-instruct
 - nomic-embed-text
 - retired-model-volumes

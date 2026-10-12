@@ -147,10 +147,10 @@ OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers the five in-cluster model Services listed
-below. The Qwen services use vLLM on port 8000; the other three use llama.cpp
-on port 8080. Clients choose the model IDs advertised by `/v1/models`; Hermes,
-n8n, and CrewAI request `qwen2.5-coder-32b-instruct`. Olla uses
-`least-connections` balancing.
+below. The Qwen2.5 Coder endpoint uses vLLM on port 8000; the other services
+use llama.cpp on port 8080. Clients choose the model IDs advertised by
+`/v1/models`; Hermes, n8n, and CrewAI request `qwen2.5-coder-32b-instruct`.
+Olla uses `least-connections` balancing.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,
@@ -166,9 +166,9 @@ discovery:
 | --- | --- | --- | --- |
 | `qwen25-coder-7b-instruct` | `mlops-node-2.lan` | vLLM, port 8000 | RTX 3080 Ti |
 | `nomic-embed-text` | `mlops-node-3.lan` | llama.cpp, port 8080 | gfx1102 |
-| `deepseek-coder-v2-lite` | `mlops-node-4.lan` | llama.cpp, port 8080 | gfx1102 |
-| `qwen25-coder-32b-instruct` | `mlops-node-6.lan` | vLLM, port 8000 | RTX 4090 |
-| `llama-33-70b-instruct` | `mlops-node-7.lan` | llama.cpp, port 8080 | gfx1151 |
+| `qwen36-27b` | `mlops-node-6.lan` | llama.cpp, port 8080 | RTX 4090 |
+| `qwen38-27b` | `mlops-node-4.lan` | llama.cpp, port 8080 | gfx1201 |
+| `qwen3-coder-next` | `mlops-node-7.lan` | llama.cpp, port 8080 | gfx1151 |
 
 Each app uses a node-bound local-path PVC, an init container to download and
 pin the model, a single GPU request, and health probes. Nodes 2, 3, 4, 6, and 7
@@ -184,11 +184,11 @@ volumes on nodes 3 and 4 remain for rollback. Copy the data before syncing the
 monitoring chart. Nodes 0 and 1 remain untainted for general workloads.
 Publish each image to GHCR and verify GPU labels and device plugins before
 syncing.
-The 128K DeepSeek context, 32K Llama context with Q8 K/V cache, and both vLLM
-allocations require validation on the target hardware.
+Validate Qwen3.8's 65K context and Q4_0 K/V cache on node 4, along with the
+other model allocations on their target hardware.
 
-The prior Qwen3-Coder-Next, Qwen3.6-27B, and Devstral Small 2 deployments and
-Services are excluded from the root app list. Their PVCs remain managed by
+The prior Llama 3.3 70B and Devstral Small 2 deployments and Services are
+excluded from the root app list. Their PVCs remain managed by
 `apps/retired-model-volumes/` so Argo CD pruning does not delete the model
 files. Remove those claims separately only when the data is no longer needed.
 
