@@ -7,3 +7,4 @@ resources:
 - deployment.yaml
 - service.yaml
 - model-pvc.yaml
+- model-pvc-node4.yaml
