@@ -24,7 +24,7 @@ spec:
         effect: NoSchedule
       initContainers:
       - name: download-model
-        image: ghcr.io/ergoshear/llama-33-70b-instruct:latest
+        image: ghcr.io/ergoshear/llama-33-70b-instruct@sha256:ce334c459190d92b1ecefd31bd9c090459d06d6bb4dc51f555186743b56eea47
         imagePullPolicy: Always
         command:
         - /usr/local/bin/download-model
@@ -33,7 +33,7 @@ spec:
           mountPath: /models
       containers:
       - name: model-server
-        image: ghcr.io/ergoshear/llama-33-70b-instruct:latest
+        image: ghcr.io/ergoshear/llama-33-70b-instruct@sha256:ce334c459190d92b1ecefd31bd9c090459d06d6bb4dc51f555186743b56eea47
         imagePullPolicy: Always
         env:
         - name: CTX_SIZE
