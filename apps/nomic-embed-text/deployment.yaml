@@ -24,7 +24,7 @@ spec:
         effect: NoSchedule
       initContainers:
       - name: download-model
-        image: ghcr.io/ergoshear/nomic-embed-text:latest
+        image: ghcr.io/ergoshear/nomic-embed-text@sha256:c18e5ed24cc5cb8c454e17ca8608fb75f6c2c7835e1d0a11f9ba1be97f01efb9
         imagePullPolicy: Always
         command:
         - /usr/local/bin/download-model
@@ -33,7 +33,7 @@ spec:
           mountPath: /models
       containers:
       - name: model-server
-        image: ghcr.io/ergoshear/nomic-embed-text:latest
+        image: ghcr.io/ergoshear/nomic-embed-text@sha256:c18e5ed24cc5cb8c454e17ca8608fb75f6c2c7835e1d0a11f9ba1be97f01efb9
         imagePullPolicy: Always
         env:
         - name: CTX_SIZE
