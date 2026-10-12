@@ -4,6 +4,4 @@ kind: Kustomization
 namespace: agents
 
 resources:
-- qwen3-coder-next-model-pvc.yaml
-- qwen36-27b-model-pvc.yaml
 - devstral-small-2-model-pvc.yaml

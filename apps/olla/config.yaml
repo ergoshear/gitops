@@ -10,16 +10,16 @@ discovery:
   type: static
   static:
     endpoints:
-      - name: qwen25-coder-32b-instruct
-        url: "http://qwen25-coder-32b-instruct:8000"
-        type: vllm
+      - name: qwen3-coder-next
+        url: "http://qwen3-coder-next:8080"
+        type: llamacpp
         priority: 100
         model_url: /v1/models
         health_check_url: /health
         check_interval: 10s
         check_timeout: 5s
-      - name: deepseek-coder-v2-lite
-        url: "http://deepseek-coder-v2-lite:8080"
+      - name: qwen36-27b
+        url: "http://qwen36-27b:8080"
         type: llamacpp
         priority: 100
         model_url: /v1/models

@@ -15,7 +15,7 @@ spec:
         app: llama-33-70b-instruct
     spec:
       nodeSelector:
-        kubernetes.io/hostname: mlops-node-7.lan
+        kubernetes.io/hostname: mlops-node-4.lan
         hardware.gpu: amd
       tolerations:
       - key: dedicated

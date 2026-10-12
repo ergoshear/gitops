@@ -17,8 +17,8 @@ resources:
 - searxng
 - olla
 - gpu-device-plugins
-- qwen25-coder-32b-instruct
-- deepseek-coder-v2-lite
+- qwen3-coder-next
+- qwen36-27b
 - llama-33-70b-instruct
 - qwen25-coder-7b-instruct
 - nomic-embed-text
