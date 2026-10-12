@@ -171,9 +171,19 @@ discovery:
 | `llama-33-70b-instruct` | `mlops-node-7.lan` | llama.cpp, port 8080 | gfx1151 |
 
 Each app uses a node-bound local-path PVC, an init container to download and
-pin the model, a single GPU request, and health probes. The node-7 pod
-tolerates the existing `dedicated=qwen3-coder-next:NoSchedule` taint. Publish
-each image to GHCR and verify GPU labels and device plugins before syncing.
+pin the model, a single GPU request, and health probes. Nodes 2, 3, 4, 6, and 7
+each have a `dedicated=<model>:NoSchedule` taint, and each model pod tolerates
+only its own node's taint. The GPU device plugins tolerate these taints.
+Code-server and the n8n sandbox run on node 1 with new local-path claims; copy
+their data from the previous node-7 and node-2 claims before syncing the new
+Deployments. The old claims remain for rollback. These taints do not evict pods
+already running on the nodes. The single GPU request and one allocatable GPU
+per node prevent a second GPU model from scheduling.
+Grafana and Prometheus still use existing local-path volumes on nodes 3 and 4;
+their chart has exact tolerations so monitoring survives restarts. Nodes 0 and 1
+remain untainted for general workloads.
+Publish each image to GHCR and verify GPU labels and device plugins before
+syncing.
 The 128K DeepSeek context, 32K Llama context with Q8 K/V cache, and both vLLM
 allocations require validation on the target hardware.
 
@@ -194,8 +204,8 @@ installs or updates host kernel drivers; those remain managed by the node OS and
 Salt.
 
 The AMD model containers receive devices through Kubernetes instead of
-privileged mode and direct host device mounts. The AMD plugin DaemonSet also
-tolerates node 7's existing dedicated taint.
+privileged mode and direct host device mounts. Both GPU plugin DaemonSets
+tolerate the dedicated model-node taints.
 ConfigMap changes trigger a rollout through Kustomize's generated name hash.
 
 ## App image updates

@@ -9,6 +9,11 @@ nodeSelector:
 # K3s registers this runtime when nvidia-container-toolkit is installed.
 runtimeClassName: nvidia
 
+tolerations:
+  - key: dedicated
+    operator: Exists
+    effect: NoSchedule
+
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:

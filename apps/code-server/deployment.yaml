@@ -17,6 +17,8 @@ spec:
         app: vscode-web
     spec:
       enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-1.lan
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -63,4 +65,4 @@ spec:
       volumes:
       - name: workspace-storage
         persistentVolumeClaim:
-          claimName: vscode-pvc
+          claimName: vscode-pvc-node-1

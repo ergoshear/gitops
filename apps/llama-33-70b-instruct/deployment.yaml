@@ -20,7 +20,7 @@ spec:
       tolerations:
       - key: dedicated
         operator: Equal
-        value: qwen3-coder-next
+        value: llama-33-70b-instruct
         effect: NoSchedule
       initContainers:
       - name: download-model

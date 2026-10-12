@@ -17,8 +17,7 @@ spec:
         hardware.gpu: amd
       tolerations:
       - key: dedicated
-        operator: Equal
-        value: qwen3-coder-next
+        operator: Exists
         effect: NoSchedule
       containers:
       - name: amd-gpu-dp-cntr

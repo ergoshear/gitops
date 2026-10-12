@@ -17,6 +17,11 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: mlops-node-3.lan
         hardware.gpu: amd
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: nomic-embed-text
+        effect: NoSchedule
       initContainers:
       - name: download-model
         image: ghcr.io/ergoshear/nomic-embed-text:latest
