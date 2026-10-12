@@ -53,7 +53,7 @@ spec:
         - name: CACHE_TYPE_V
           value: q4_0
         - name: FLASH_ATTN
-          value: "off"
+          value: "on"
         - name: TEMP
           value: "1.0"
         - name: TOP_P
