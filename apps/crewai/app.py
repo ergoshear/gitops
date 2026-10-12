@@ -37,7 +37,7 @@ from crewai.llm import LLM
 
 LLM_PROVIDER = os.getenv("CREWAI_LLM_PROVIDER", "olla")
 LLM_BASE_URL = os.getenv("CREWAI_LLM_BASE_URL", "http://olla:40114/olla/openai/v1")
-LLM_MODEL = os.getenv("CREWAI_LLM_MODEL", "qwen2.5-coder-32b-instruct")
+LLM_MODEL = os.getenv("CREWAI_LLM_MODEL", "qwen3-coder-next")
 LLM_API_KEY = os.getenv("CREWAI_LLM_API_KEY", "olla")
 MAX_WORKERS = int(os.getenv("CREWAI_MAX_WORKERS", "4"))
 TIMEOUT = int(os.getenv("CREWAI_TIMEOUT", "300"))

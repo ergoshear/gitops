@@ -148,8 +148,8 @@ OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
 `apps/olla/config.yaml` discovers the five in-cluster model Services listed
 below. The Qwen2.5 Coder endpoint uses vLLM on port 8000; the other services
-use llama.cpp on port 8080. Clients choose the model IDs advertised by
-`/v1/models`; Hermes, n8n, and CrewAI request `qwen2.5-coder-32b-instruct`.
+use llama.cpp on port 8080. Clients choose model IDs advertised by `/v1/models`;
+Hermes, n8n, and CrewAI request `qwen3-coder-next`.
 Olla uses `least-connections` balancing.
 
 The dashboard has no authentication. Its allowlist admits private-network

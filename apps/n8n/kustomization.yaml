@@ -34,7 +34,7 @@ patches:
       - name: N8N_INSTANCE_AI_MODEL_API_KEY
         value: olla
       - name: N8N_INSTANCE_AI_MODEL
-        value: qwen2.5-coder-32b-instruct
+        value: qwen3-coder-next
       - name: N8N_INSTANCE_AI_THINKING_ENABLED
         value: "false"
       - name: N8N_INSTANCE_AI_SANDBOX_ENABLED
