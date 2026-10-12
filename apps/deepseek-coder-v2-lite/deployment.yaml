@@ -24,7 +24,7 @@ spec:
         effect: NoSchedule
       initContainers:
       - name: download-model
-        image: ghcr.io/ergoshear/deepseek-coder-v2-lite:latest
+        image: ghcr.io/ergoshear/deepseek-coder-v2-lite@sha256:9c86226226b41aefd48d8e546ff6d422135c00da554bbae1fcc16321a7e86337
         imagePullPolicy: Always
         command:
         - /usr/local/bin/download-model
@@ -33,7 +33,7 @@ spec:
           mountPath: /models
       containers:
       - name: model-server
-        image: ghcr.io/ergoshear/deepseek-coder-v2-lite:latest
+        image: ghcr.io/ergoshear/deepseek-coder-v2-lite@sha256:9c86226226b41aefd48d8e546ff6d422135c00da554bbae1fcc16321a7e86337
         imagePullPolicy: Always
         env:
         - name: CTX_SIZE
