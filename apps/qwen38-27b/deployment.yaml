@@ -37,9 +37,9 @@ spec:
         imagePullPolicy: Always
         env:
         - name: GPU_LAYERS
-          value: "99"
+          value: "0"
         - name: CTX_SIZE
-          value: "65536"
+          value: "32768"
         - name: PARALLEL
           value: "1"
         - name: THREADS
@@ -53,7 +53,7 @@ spec:
         - name: CACHE_TYPE_V
           value: q4_0
         - name: FLASH_ATTN
-          value: "on"
+          value: "off"
         - name: TEMP
           value: "1.0"
         - name: TOP_P
