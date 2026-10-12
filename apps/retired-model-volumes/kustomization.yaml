@@ -5,3 +5,5 @@ namespace: agents
 
 resources:
 - devstral-small-2-model-pvc.yaml
+- llama-33-70b-instruct-model-pvc.yaml
+- llama-33-70b-instruct-model-node4-pvc.yaml
