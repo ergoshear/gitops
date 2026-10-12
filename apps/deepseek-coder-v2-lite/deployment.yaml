@@ -17,6 +17,11 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: mlops-node-4.lan
         hardware.gpu: amd
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: deepseek-coder-v2-lite
+        effect: NoSchedule
       initContainers:
       - name: download-model
         image: ghcr.io/ergoshear/deepseek-coder-v2-lite:latest

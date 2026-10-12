@@ -17,6 +17,11 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: mlops-node-2.lan
         hardware.gpu: nvidia
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: qwen25-coder-7b-instruct
+        effect: NoSchedule
       runtimeClassName: nvidia
       initContainers:
       - name: download-model

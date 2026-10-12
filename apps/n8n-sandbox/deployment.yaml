@@ -12,6 +12,12 @@ spec:
       labels:
         app: sandbox-api
     spec:
+      # The existing sandbox-tls local-path volume is bound to mlops-node-2.
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: qwen25-coder-7b-instruct
+        effect: NoSchedule
       initContainers:
       - name: bootstrap-mtls
         image: ghcr.io/n8n-io/n8n-sandbox-service-api:1.7.0
@@ -106,6 +112,11 @@ spec:
       labels:
         app: sandbox-runner-1
     spec:
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: qwen25-coder-7b-instruct
+        effect: NoSchedule
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

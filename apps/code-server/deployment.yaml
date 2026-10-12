@@ -17,6 +17,12 @@ spec:
         app: vscode-web
     spec:
       enableServiceLinks: false
+      # The existing local-path workspace volume is bound to mlops-node-7.
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: llama-33-70b-instruct
+        effect: NoSchedule
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
