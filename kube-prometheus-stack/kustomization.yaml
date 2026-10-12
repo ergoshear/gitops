@@ -4,6 +4,7 @@ namespace: monitoring
 
 resources:
 - crds
+- grafana-pvcs.yaml
 
 helmCharts:
   - name: kube-prometheus-stack

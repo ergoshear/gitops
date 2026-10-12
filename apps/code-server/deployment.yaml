@@ -17,12 +17,8 @@ spec:
         app: vscode-web
     spec:
       enableServiceLinks: false
-      # The existing local-path workspace volume is bound to mlops-node-7.
-      tolerations:
-      - key: dedicated
-        operator: Equal
-        value: llama-33-70b-instruct
-        effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-1.lan
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -69,4 +65,4 @@ spec:
       volumes:
       - name: workspace-storage
         persistentVolumeClaim:
-          claimName: vscode-pvc
+          claimName: vscode-pvc-node-1

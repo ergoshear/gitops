@@ -8,6 +8,8 @@ prometheus:
   prometheusSpec:
     replicas: 1
     retention: 10d
+    nodeSelector:
+      kubernetes.io/hostname: mlops-node-0.lan
     resources:
       limits:
         cpu: 2000m
@@ -17,6 +19,8 @@ prometheus:
         memory: 2Gi
     storageSpec:
       volumeClaimTemplate:
+        metadata:
+          name: prometheus-data-node-0
         spec:
           storageClassName: "local-path"
           resources:
@@ -29,10 +33,11 @@ prometheus:
 grafana:
   enabled: true
   adminPassword: "admin"
+  nodeSelector:
+    kubernetes.io/hostname: mlops-node-0.lan
   persistence:
     enabled: true
-    storageClassName: "local-path"
-    size: 10Gi
+    existingClaim: kube-prometheus-stack-grafana-node-0
   resources:
     limits:
       cpu: 1000m

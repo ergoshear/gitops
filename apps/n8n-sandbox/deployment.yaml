@@ -12,12 +12,8 @@ spec:
       labels:
         app: sandbox-api
     spec:
-      # The existing sandbox-tls local-path volume is bound to mlops-node-2.
-      tolerations:
-      - key: dedicated
-        operator: Equal
-        value: qwen25-coder-7b-instruct
-        effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-1.lan
       initContainers:
       - name: bootstrap-mtls
         image: ghcr.io/n8n-io/n8n-sandbox-service-api:1.7.0
@@ -96,7 +92,7 @@ spec:
       volumes:
       - name: sandbox-tls
         persistentVolumeClaim:
-          claimName: sandbox-tls
+          claimName: sandbox-tls-node-1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -112,11 +108,8 @@ spec:
       labels:
         app: sandbox-runner-1
     spec:
-      tolerations:
-      - key: dedicated
-        operator: Equal
-        value: qwen25-coder-7b-instruct
-        effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/hostname: mlops-node-1.lan
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -193,4 +186,4 @@ spec:
       volumes:
       - name: sandbox-tls
         persistentVolumeClaim:
-          claimName: sandbox-tls
+          claimName: sandbox-tls-node-1
