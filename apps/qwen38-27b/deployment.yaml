@@ -49,11 +49,11 @@ spec:
         - name: UBATCH_SIZE
           value: "64"
         - name: CACHE_TYPE_K
-          value: q4_0
+          value: f16
         - name: CACHE_TYPE_V
-          value: q4_0
+          value: f16
         - name: FLASH_ATTN
-          value: "on"
+          value: "off"
         - name: TEMP
           value: "1.0"
         - name: TOP_P
@@ -70,7 +70,6 @@ spec:
           limits:
             cpu: "24"
             memory: 48Gi
-            amd.com/gpu: 1
         securityContext:
           allowPrivilegeEscalation: false
           seccompProfile:
