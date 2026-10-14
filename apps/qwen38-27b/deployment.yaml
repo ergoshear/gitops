@@ -37,7 +37,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: GPU_LAYERS
-          value: "0"
+          value: "99"
         - name: CTX_SIZE
           value: "32768"
         - name: PARALLEL
@@ -70,6 +70,7 @@ spec:
           limits:
             cpu: "24"
             memory: 48Gi
+            amd.com/gpu: 1
         securityContext:
           allowPrivilegeEscalation: false
           seccompProfile:
