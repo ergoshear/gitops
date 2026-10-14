@@ -62,6 +62,8 @@ spec:
         env:
         - name: HF_HOME
           value: /models/huggingface
+        - name: PYTORCH_ROCM_ARCH
+          value: gfx1201
         - name: VLLM_LOGGING_LEVEL
           value: DEBUG
         - name: VLLM_DISABLED_KERNELS
