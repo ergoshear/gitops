@@ -81,16 +81,11 @@ curl -X POST https://crew.ergoshear.dev/crews/research/run \
 
 ## Building and Publishing
 
-```bash
-# Build the Docker image
-docker build -t ghcr.io/ergoshear/crewai:latest .
-
-# Push to GHCR
-docker push ghcr.io/ergoshear/crewai:latest
-
-# Deploy via ArgoCD (already configured)
-kubectl kustomize apps/crewai --enable-helm | kubectl apply -f -
-```
+CrewAI's application source, Dockerfile, and image build workflow live in the
+[ergoshear/crewai repository](https://github.com/ergoshear/crewai). Its GitHub
+Actions workflow publishes `ghcr.io/ergoshear/crewai:latest` and a tag matching
+the source commit SHA. Update the image tag in `deployment.yaml` to deploy a
+specific build; Argo CD manages the Kubernetes resources from this GitOps repo.
 
 ## Dependencies
 
