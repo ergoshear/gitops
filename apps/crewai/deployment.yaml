@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: crewai
-        image: ghcr.io/ergoshear/crewai:5f765993d2f9c79eaac1e5d49ad38edd743256ff
+        image: ghcr.io/ergoshear/crewai:e31784e5e402a936000a931273c71836ab1f9f68
         imagePullPolicy: Always
         ports:
         - name: http
