@@ -27,10 +27,14 @@ spec:
         image: vllm/vllm-openai-rocm:v0.29.0
         imagePullPolicy: Always
         command:
-        - vllm
+        - /bin/bash
+        - -lc
         args:
-        - serve
-        - palmfuture/Qwen3.8-27B-GPTQ-Int4
+        - python -m pip install --no-deps --no-build-isolation vllm-gguf-plugin && exec vllm serve "$@"
+        - --
+        - DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF:Q4_K_M
+        - --tokenizer
+        - Qwen/Qwen3.8-27B
         - --served-model-name
         - Qwen3.8-27B
         - --host
@@ -39,8 +43,6 @@ spec:
         - "8080"
         - --dtype
         - float16
-        - --quantization
-        - gptq
         - --max-model-len
         - "32768"
         - --max-num-batched-tokens
