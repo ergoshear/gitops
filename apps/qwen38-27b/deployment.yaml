@@ -38,6 +38,8 @@ spec:
         env:
         - name: GPU_LAYERS
           value: "99"
+        - name: LLAMA_ARG_LOG_VERBOSITY
+          value: "5"
         - name: CTX_SIZE
           value: "32768"
         - name: PARALLEL
