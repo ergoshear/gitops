@@ -32,7 +32,7 @@ Available templates: `research`, `code-review`, `content`
 |--------------------------|------------------------------------------|--------------------------------------|
 | `CREWAI_LLM_PROVIDER`    | `olla`                                   | LLM provider name                    |
 | `CREWAI_LLM_BASE_URL`    | `http://olla:40114/olla/openai/v1`      | LLM API base URL                     |
-| `CREWAI_LLM_MODEL`       | `qwen2.5-coder-32b-instruct`             | Model name/alias                     |
+| `CREWAI_LLM_MODEL`       | `qwen3-coder-next`                        | Model name/alias exposed by Olla      |
 | `CREWAI_LLM_API_KEY`     | `olla`                                   | API key for the LLM provider         |
 | `CREWAI_MAX_WORKERS`     | `4`                                      | Max concurrent crew executions       |
 | `CREWAI_TIMEOUT`         | `300`                                    | Timeout per execution (seconds)      |
