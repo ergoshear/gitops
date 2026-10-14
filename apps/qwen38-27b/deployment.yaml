@@ -32,7 +32,7 @@ spec:
         args:
         - python -m pip install --no-deps --no-build-isolation https://github.com/vllm-project/vllm-gguf-plugin/archive/e2b8ad532b8b5ea175100202c30430c1d2b5e6a8.zip gguf && exec vllm serve "$@"
         - --
-        - DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF:Q4_K_M
+        - DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF/Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-MTP-Q4_K_M.gguf
         - --tokenizer
         - Qwen/Qwen3.8-27B
         - --hf-config-path
