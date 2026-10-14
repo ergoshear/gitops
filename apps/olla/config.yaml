@@ -28,7 +28,7 @@ discovery:
         check_timeout: 5s
       - name: qwen38-27b
         url: "http://qwen38-27b:8080"
-        type: llamacpp
+        type: vllm
         priority: 100
         model_url: /v1/models
         health_check_url: /health

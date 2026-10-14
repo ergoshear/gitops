@@ -22,56 +22,54 @@ spec:
         operator: Equal
         value: qwen38-27b
         effect: NoSchedule
-      initContainers:
-      - name: download-model
-        image: ghcr.io/ergoshear/qwen38-27b:latest
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai-rocm:v0.29.0
         imagePullPolicy: Always
         command:
-        - /usr/local/bin/download-model
-        volumeMounts:
-        - name: models
-          mountPath: /models
-      containers:
-      - name: llama-server
-        image: ghcr.io/ergoshear/qwen38-27b:latest
-        imagePullPolicy: Always
+        - vllm
+        args:
+        - serve
+        - palmfuture/Qwen3.8-27B-GPTQ-Int4
+        - --served-model-name
+        - Qwen3.8-27B
+        - --host
+        - 0.0.0.0
+        - --port
+        - "8080"
+        - --dtype
+        - float16
+        - --quantization
+        - gptq
+        - --max-model-len
+        - "32768"
+        - --max-num-batched-tokens
+        - "2096"
+        - --max-num-seqs
+        - "1"
+        - --gpu-memory-utilization
+        - "0.9"
+        - --enable-chunked-prefill
+        - --reasoning-parser
+        - qwen3
+        - --enable-auto-tool-choice
+        - --tool-call-parser
+        - qwen3_coder
         env:
-        - name: GPU_LAYERS
-          value: "99"
-        - name: LLAMA_ARG_LOG_VERBOSITY
-          value: "5"
-        - name: CTX_SIZE
-          value: "32768"
-        - name: PARALLEL
-          value: "1"
-        - name: THREADS
-          value: "16"
-        - name: BATCH_SIZE
-          value: "128"
-        - name: UBATCH_SIZE
-          value: "64"
-        - name: CACHE_TYPE_K
-          value: f16
-        - name: CACHE_TYPE_V
-          value: f16
-        - name: FLASH_ATTN
-          value: "off"
-        - name: TEMP
-          value: "1.0"
-        - name: TOP_P
-          value: "0.95"
-        - name: TOP_K
-          value: "20"
+        - name: HF_HOME
+          value: /models/huggingface
+        - name: VLLM_LOGGING_LEVEL
+          value: DEBUG
         ports:
         - name: http
           containerPort: 8080
         resources:
           requests:
             cpu: "8"
-            memory: 24Gi
+            memory: 32Gi
           limits:
             cpu: "24"
-            memory: 48Gi
+            memory: 64Gi
             amd.com/gpu: 1
         securityContext:
           allowPrivilegeEscalation: false
@@ -80,7 +78,8 @@ spec:
         volumeMounts:
         - name: models
           mountPath: /models
-          readOnly: true
+        - name: shm
+          mountPath: /dev/shm
         startupProbe:
           httpGet:
             path: /health
@@ -103,3 +102,7 @@ spec:
       - name: models
         persistentVolumeClaim:
           claimName: qwen38-27b-model
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
