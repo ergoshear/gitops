@@ -60,6 +60,8 @@ spec:
           value: /models/huggingface
         - name: VLLM_LOGGING_LEVEL
           value: DEBUG
+        - name: VLLM_DISABLED_KERNELS
+          value: RDNAHybridW4A16LinearKernel
         ports:
         - name: http
           containerPort: 8080
