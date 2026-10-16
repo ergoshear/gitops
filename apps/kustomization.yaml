@@ -17,7 +17,6 @@ resources:
 - searxng
 - olla
 - gpu-device-plugins
-- qwen3-coder-next
 - qwen36-27b
 - qwen38-27b
 - qwen25-coder-7b-instruct

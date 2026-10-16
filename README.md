@@ -146,11 +146,12 @@ The read-only dashboard is at `https://olla.ergoshear.dev/internal/ui/`, and
 OpenAI-compatible clients can use `https://olla.ergoshear.dev/olla/openai/v1`.
 
 Olla uses its native configuration, not LiteLLM's `model_list` schema.
-`apps/olla/config.yaml` discovers the five in-cluster model Services listed
-below. The Qwen2.5 Coder endpoint uses vLLM on port 8000; the other services
-use llama.cpp on port 8080. Clients choose the model IDs advertised by
-`/v1/models`; Hermes, n8n, and CrewAI request `qwen3-coder-next`.
-Olla uses `least-connections` balancing.
+`apps/olla/config.yaml` discovers the four in-cluster model Services and the
+two Windows LM Studio servers listed below. The Qwen2.5 Coder endpoint uses
+vLLM on port 8000; the in-cluster llama.cpp services use port 8080; LM Studio
+serves on port 1234. Clients choose the model IDs advertised by `/v1/models`;
+Hermes, n8n, and CrewAI request their configured model IDs. Olla uses
+`least-connections` balancing.
 
 The dashboard has no authentication. Its allowlist admits private-network
 connections and the Olla hostname; behind Traefik it sees the proxy's address,
@@ -168,16 +169,17 @@ discovery:
 | `nomic-embed-text` | `mlops-node-3.lan` | llama.cpp, port 8080 | gfx1102 |
 | `qwen36-27b` | `mlops-node-6.lan` | llama.cpp, port 8080 | RTX 4090 |
 | `qwen38-27b` | `mlops-node-4.lan` | llama.cpp, port 8080 | gfx1201 |
-| `qwen3-coder-next` | `mlops-node-7.lan` | llama.cpp, port 8080 | gfx1151 |
+| `lmstudio-node-7` | `mlops-node-7.lan` | LM Studio, port 1234 | Windows 11 |
+| `lmstudio-node-9` | `mlops-node-9.lan` | LM Studio, port 1234 | Windows 11 |
 
 Each app uses a node-bound local-path PVC, an init container to download and
-pin the model, a single GPU request, and health probes. Nodes 2, 3, 4, 6, and 7
+pin the model, a single GPU request, and health probes. Nodes 2, 3, 4, and 6
 each have a `dedicated=<model>:NoSchedule` taint, and each model pod tolerates
 only its own node's taint. The GPU device plugins tolerate these taints.
-Code-server and the n8n sandbox run on node 1 with new local-path claims; copy
-their data from the previous node-7 and node-2 claims before syncing the new
-Deployments. The old claims remain for rollback. These taints do not evict pods
-already running on the nodes. The single GPU request and one allocatable GPU
+Code-server and the n8n sandbox run on node 1 with new local-path claims. The
+old claims remain for rollback; the node-7 model claim is retained but its
+local data is unavailable while that node is removed. These taints do not evict
+pods already running on the nodes. The single GPU request and one allocatable GPU
 per node prevent a second GPU model from scheduling.
 Grafana and Prometheus use new local-path volumes on node 0. Their previous
 volumes on nodes 3 and 4 remain for rollback. Copy the data before syncing the
