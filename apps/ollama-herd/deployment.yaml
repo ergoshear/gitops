@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-herd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama-herd
+  template:
+    metadata:
+      labels:
+        app: ollama-herd
+    spec:
+      containers:
+      - name: ollama-herd
+        image: python:3.12-slim
+        imagePullPolicy: IfNotPresent
+        command: [sh, -c]
+        args:
+        - pip install --no-cache-dir ollama-herd==0.11.2 && exec herd
+        ports:
+        - name: http
+          containerPort: 11435
+        env:
+        - name: FLEET_HOST
+          value: 0.0.0.0
+        - name: FLEET_PORT
+          value: "11435"
+        - name: FLEET_DATA_DIR
+          value: /data
+        - name: FLEET_NODE_TELEMETRY
+          value: "false"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: ollama-herd-data
