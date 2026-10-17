@@ -16,6 +16,7 @@ resources:
 - n8n-sandbox
 - searxng
 - olla
+- ollama-herd
 - gpu-device-plugins
 - qwen36-27b
 - qwen38-27b

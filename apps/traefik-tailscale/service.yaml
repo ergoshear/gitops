@@ -6,7 +6,7 @@ metadata:
     tailscale.com/hostname: apps-ingress
     external-dns.kubernetes.io/enabled: "true"
     external-dns.kubernetes.io/hostname: >-
-      hermes-agent.ergoshear.dev,n8n.ergoshear.dev,code.ergoshear.dev,crew.ergoshear.dev,olla.ergoshear.dev,argocd.ergoshear.dev
+      hermes-agent.ergoshear.dev,n8n.ergoshear.dev,code.ergoshear.dev,crew.ergoshear.dev,olla.ergoshear.dev,herd.ergoshear.dev,argocd.ergoshear.dev
     # Keep public DNS on the Tailscale proxy instead of Traefik's LAN address.
     # Update this target if the Tailscale Service receives a different IP.
     external-dns.kubernetes.io/target: "100.77.66.114"
